@@ -70,7 +70,7 @@ export default function Dashboard() {
           <div className="bg-blue-600 w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold">
             B
           </div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">BuildPath</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">VDM App</h1>
         </div>
 
         <div className="flex items-center gap-4">

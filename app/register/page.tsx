@@ -38,7 +38,7 @@ export default function RegisterPage() {
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
             <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-100">
                 <h1 className="text-2xl font-bold mb-2 text-center text-gray-900">Create Account</h1>
-                <p className="text-center text-gray-500 mb-8">Join the BuildPath team</p>
+                <p className="text-center text-gray-500 mb-8">Join the VDM App team</p>
 
                 <form onSubmit={handleSignUp} className="space-y-4">
                     <div>
