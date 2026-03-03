@@ -5,7 +5,7 @@ import { NewProjectDialog } from '@/components/NewProjectDialog';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input'; // New Input for search
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation'; // Added for smooth row clicking
 
 // Helper for Badge Colors
 const getStatusColor = (status: string) => {
@@ -28,13 +29,43 @@ const getStatusColor = (status: string) => {
     }
 };
 
+// --- NEW: Helper for Consistent Dates ---
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'None set';
+    return new Date(dateString).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter(); // Initialize router
 
-    // New State for Search & Sort
+    // State for Search & Sort
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+    // --- NEW: View Persistence State ---
+    const [activeTab, setActiveTab] = useState('kanban');
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        // Read preference from browser storage on mount
+        const savedView = localStorage.getItem('vdm-view-preference');
+        if (savedView) {
+            setActiveTab(savedView);
+        }
+        setIsMounted(true); // Tells React it's safe to render the UI
+    }, []);
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value);
+        localStorage.setItem('vdm-view-preference', value); // Save preference
+    };
+    // ------------------------------------
 
     const fetchProjects = async () => {
         // Only show loading on initial fetch, not updates
@@ -53,21 +84,17 @@ export default function ProjectsPage() {
 
     // --- Optimistic UI Logic ---
     const handleMoveProject = async (projectId: string, newStatus: string) => {
-        // 1. Snapshot the current state (in case we need to revert)
         const previousProjects = [...projects];
 
-        // 2. Optimistically update the UI IMMEDIATELY
         setProjects((prev) =>
             prev.map((p) => (p.id === projectId ? { ...p, status: newStatus } : p))
         );
 
-        // 3. Send request to Supabase in background
         const { error } = await supabase
             .from('projects')
             .update({ status: newStatus })
             .eq('id', projectId);
 
-        // 4. If error, revert changes and show alert
         if (error) {
             console.error('Update failed:', error);
             alert('Failed to move project. Reverting...');
@@ -79,7 +106,6 @@ export default function ProjectsPage() {
     const filteredProjects = useMemo(() => {
         let processed = [...projects];
 
-        // 1. Search Filter
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             processed = processed.filter(p =>
@@ -88,7 +114,6 @@ export default function ProjectsPage() {
             );
         }
 
-        // 2. Sorting
         if (sortConfig) {
             processed.sort((a, b) => {
                 const aValue = a[sortConfig.key] || '';
@@ -102,7 +127,6 @@ export default function ProjectsPage() {
         return processed;
     }, [projects, searchTerm, sortConfig]);
 
-    // Sorting Handler
     const handleSort = (key: string) => {
         setSortConfig((current) => {
             if (current?.key === key && current.direction === 'asc') {
@@ -144,68 +168,86 @@ export default function ProjectsPage() {
                 </div>
 
                 {/* Tabs & Views */}
-                <Tabs defaultValue="kanban" className="w-full">
-                    <TabsList className="mb-4">
-                        <TabsTrigger value="kanban" className="cursor-pointer">Board View</TabsTrigger>
-                        <TabsTrigger value="list" className="cursor-pointer">List View</TabsTrigger>
-                    </TabsList>
+                {!isMounted ? (
+                    <div className="py-10 text-center text-slate-500 animate-pulse">Loading view...</div>
+                ) : (
+                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="kanban" className="cursor-pointer">Board View</TabsTrigger>
+                            <TabsTrigger value="list" className="cursor-pointer">List View</TabsTrigger>
+                        </TabsList>
 
-                    <TabsContent value="kanban">
-                        {loading ? <p>Loading board...</p> : (
-                            <KanbanBoard projects={filteredProjects} onProjectMoved={handleMoveProject} />
-                        )}
-                    </TabsContent>
+                        <TabsContent value="kanban">
+                            {loading ? <p>Loading board...</p> : (
+                                <KanbanBoard projects={filteredProjects} onProjectMoved={handleMoveProject} />
+                            )}
+                        </TabsContent>
 
-                    <TabsContent value="list">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>All Active Jobs ({filteredProjects.length})</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {loading ? (
-                                    <p className="text-sm text-slate-500">Loading projects...</p>
-                                ) : filteredProjects.length === 0 ? (
-                                    <div className="text-center py-10 text-slate-500">
-                                        No projects found matching your search.
-                                    </div>
-                                ) : (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('name')}>
-                                                    Project Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </TableHead>
-                                                <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('job_type')}>
-                                                    Type {sortConfig?.key === 'job_type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </TableHead>
-                                                <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('status')}>
-                                                    Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </TableHead>
-                                                <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('deadline')}>
-                                                    Deadline {sortConfig?.key === 'deadline' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredProjects.map((project) => (
-                                                <TableRow key={project.id}>
-                                                    <TableCell className="font-medium">{project.name}</TableCell>
-                                                    <TableCell>{project.job_type}</TableCell>
-                                                    <TableCell>
-                                                        <Badge className={getStatusColor(project.status)} variant="outline">
-                                                            {project.status}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell>{project.deadline || '-'}</TableCell>
+                        <TabsContent value="list">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>All Active Jobs ({filteredProjects.length})</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {loading ? (
+                                        <p className="text-sm text-slate-500">Loading projects...</p>
+                                    ) : filteredProjects.length === 0 ? (
+                                        <div className="text-center py-10 text-slate-500">
+                                            No projects found matching your search.
+                                        </div>
+                                    ) : (
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('name')}>
+                                                        Project Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                    </TableHead>
+                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('job_type')}>
+                                                        Type {sortConfig?.key === 'job_type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                    </TableHead>
+                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('status')}>
+                                                        Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                    </TableHead>
+                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('deadline')}>
+                                                        Deadline {sortConfig?.key === 'deadline' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                    </TableHead>
+                                                    <TableHead className="text-right">Action</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {filteredProjects.map((project) => (
+                                                    <TableRow
+                                                        key={project.id}
+                                                        className="cursor-pointer hover:bg-slate-50 transition-colors group"
+                                                        onClick={() => router.push(`/projects/${project.id}`)}
+                                                    >
+                                                        <TableCell className="font-medium">
+                                                            <span className="group-hover:text-blue-600 group-hover:underline transition-colors">
+                                                                {project.name}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell>{project.job_type}</TableCell>
+                                                        <TableCell>
+                                                            <Badge className={getStatusColor(project.status)} variant="outline">
+                                                                {project.status}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>{formatDate(project.deadline)}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                View →
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                )}
             </div>
         </div>
     );

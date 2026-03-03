@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useDraggable, useDroppable } from '@dnd-kit/core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 // Using the same columns, but we will pass colors dynamically now
 const COLUMNS = [
@@ -10,6 +11,16 @@ const COLUMNS = [
     { id: 'In Production', title: 'In Production', color: 'bg-blue-50' },
     { id: 'Completed', title: 'Completed', color: 'bg-green-50' },
 ];
+
+// --- NEW: Helper for Consistent Dates ---
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'None set';
+    return new Date(dateString).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+};
 
 // Changed props: accept 'onProjectMoved' instead of doing it internally
 export function KanbanBoard({ projects, onProjectMoved }: { projects: any[], onProjectMoved: (id: string, newStatus: string) => void }) {
@@ -103,19 +114,41 @@ function DraggableProjectCard({ project }: { project: any }) {
 function ProjectCard({ project }: { project: any }) {
     if (!project) return null;
     return (
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-gray-200 cursor-grab">
+        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-gray-200 cursor-grab relative">
             <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start">
-                    <CardTitle className="text-sm font-semibold text-gray-900 leading-tight">{project.name}</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-gray-900 leading-tight pr-6">
+                        {/* We wrap the name in a Link, and stop the drag event on the title itself */}
+                        <Link
+                            href={`/projects/${project.id}`}
+                            className="hover:text-blue-600 hover:underline transition-colors"
+                            onPointerDown={(e) => e.stopPropagation()}
+                        >
+                            {project.name}
+                        </Link>
+                    </CardTitle>
                     <Badge variant="outline" className="text-[10px] uppercase">{project.job_type}</Badge>
                 </div>
             </CardHeader>
             <CardContent className="p-4 pt-2">
-                <p className="text-xs text-gray-500 line-clamp-2 mb-3">{project.description || 'No description provided.'}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                    {/* Calendar Icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
-                    {project.deadline || 'No Deadline'}
+                <p className="text-xs text-gray-500 line-clamp-2 mb-3 pr-8">
+                    {project.description || 'No description provided.'}
+                </p>
+                <div className="flex items-center justify-between gap-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                        {formatDate(project.deadline)}
+                    </div>
+
+                    {/* NEW: Dedicated, crystal clear "View" link that won't trigger a drag event */}
+                    <Link
+                        href={`/projects/${project.id}`}
+                        className="p-1.5 -m-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+                        onPointerDown={(e) => e.stopPropagation()} // Crucial: Prevents drag initiation
+                        title="View Project Workspace"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                    </Link>
                 </div>
             </CardContent>
         </Card>

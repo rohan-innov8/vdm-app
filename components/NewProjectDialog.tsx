@@ -61,7 +61,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">+ New Project</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 cursor-pointer">+ New Project</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
