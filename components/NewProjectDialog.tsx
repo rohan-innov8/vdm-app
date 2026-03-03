@@ -41,7 +41,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                 description,
                 job_type: jobType,
                 deadline: deadline || null, // Handle empty dates
-                status: 'New', // Default status
+                status: 'Pre-Production', // Default status
             },
         ]);
 

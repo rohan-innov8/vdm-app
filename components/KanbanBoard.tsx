@@ -7,9 +7,9 @@ import Link from 'next/link';
 
 // Using the same columns, but we will pass colors dynamically now
 const COLUMNS = [
-    { id: 'New', title: 'New Orders', color: 'bg-gray-100' },
-    { id: 'In Production', title: 'In Production', color: 'bg-blue-50' },
-    { id: 'Completed', title: 'Completed', color: 'bg-green-50' },
+    { id: 'Pre-Production', title: 'Pre-Production', color: 'bg-gray-100' },
+    { id: 'Production', title: 'Production', color: 'bg-blue-50' },
+    { id: 'Post-Production', title: 'Post-Production', color: 'bg-green-50' },
 ];
 
 // --- NEW: Helper for Consistent Dates ---

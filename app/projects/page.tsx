@@ -22,9 +22,9 @@ import { useRouter } from 'next/navigation'; // Added for smooth row clicking
 // Helper for Badge Colors
 const getStatusColor = (status: string) => {
     switch (status) {
-        case 'New': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
-        case 'In Production': return 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200';
-        case 'Completed': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
+        case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
+        case 'Production': return 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200';
+        case 'Post-Production': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
         default: return 'bg-gray-100 text-gray-800';
     }
 };
