@@ -148,7 +148,6 @@ export default function UserManagementPage() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="admin">Admin</SelectItem>
-                                                    <SelectItem value="maker">Maker</SelectItem>
                                                     <SelectItem value="viewer">Viewer</SelectItem>
                                                 </SelectContent>
                                             </Select>

@@ -48,7 +48,7 @@ export default function ProjectDetailsPage() {
             // 2. Fetch Project Details
             const { data, error } = await supabase
                 .from('projects')
-                .select('*')
+                .select('*, profiles(full_name)') // Pull in the designer's name
                 .eq('id', projectId)
                 .single();
 
@@ -146,6 +146,15 @@ export default function ProjectDetailsPage() {
                                 <CardTitle>Project Info</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4 text-sm">
+                                <div>
+                                    <span className="text-slate-500 font-medium block mb-1">Designer</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                                            {project.profiles?.full_name ? project.profiles.full_name.charAt(0).toUpperCase() : 'U'}
+                                        </span>
+                                        <span className="font-medium text-slate-900">{project.profiles?.full_name || 'Unassigned'}</span>
+                                    </div>
+                                </div>
                                 <div>
                                     <span className="text-slate-500 font-medium block">Deadline</span>
                                     <span className="text-slate-900 font-medium">{formatDate(project.deadline)}</span>

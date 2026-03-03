@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
-import { Trash2Icon } from 'lucide-react'; // <-- Added Trash Icon
+import { Trash2Icon } from 'lucide-react';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -41,7 +41,7 @@ const formatDate = (dateString: string | null) => {
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false); // <-- NEW: Admin State
+    const [isAdmin, setIsAdmin] = useState(false);
     const router = useRouter();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -63,14 +63,17 @@ export default function ProjectsPage() {
     const fetchProjects = async () => {
         if (projects.length === 0) setLoading(true);
 
-        // Fetch User Role for Permissions
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
             setIsAdmin(profile?.role === 'admin');
         }
 
-        const { data, error } = await supabase.from('projects').select('*');
+        // NEW: Fetch projects AND the associated designer's name from the profiles table
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*, profiles(full_name)');
+
         if (error) console.error(error);
         else setProjects(data || []);
 
@@ -94,15 +97,12 @@ export default function ProjectsPage() {
         }
     };
 
-    // --- NEW: Delete Project Function ---
     const handleDeleteProject = async (projectId: string, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation(); // Prevent the row click from triggering navigation
-
+        if (e) e.stopPropagation();
         if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted.')) {
             return;
         }
 
-        // Optimistic UI Removal
         const previousProjects = [...projects];
         setProjects(prev => prev.filter(p => p.id !== projectId));
 
@@ -110,7 +110,7 @@ export default function ProjectsPage() {
 
         if (error) {
             alert('Failed to delete project: ' + error.message);
-            setProjects(previousProjects); // Revert on error
+            setProjects(previousProjects);
         }
     };
 
@@ -121,7 +121,8 @@ export default function ProjectsPage() {
             const lowerTerm = searchTerm.toLowerCase();
             processed = processed.filter(p =>
                 p.name.toLowerCase().includes(lowerTerm) ||
-                p.job_type.toLowerCase().includes(lowerTerm)
+                p.job_type.toLowerCase().includes(lowerTerm) ||
+                (p.profiles?.full_name && p.profiles.full_name.toLowerCase().includes(lowerTerm))
             );
         }
 
@@ -167,7 +168,7 @@ export default function ProjectsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <Input
-                        placeholder="Search projects..."
+                        placeholder="Search projects or designers..."
                         className="pl-10 bg-white"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,10 +185,7 @@ export default function ProjectsPage() {
                         </TabsList>
 
                         <TabsContent value="kanban">
-                            {/* Pass down isAdmin and Delete Action */}
-                            {loading ? (
-                                <p>Loading board...</p>
-                            ) : (
+                            {loading ? <p>Loading board...</p> : (
                                 <KanbanBoard
                                     projects={filteredProjects}
                                     onProjectMoved={handleMoveProject}
@@ -216,11 +214,17 @@ export default function ProjectsPage() {
                                                     <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('name')}>
                                                         Project Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                                     </TableHead>
+                                                    {/* NEW: Designer Column */}
+                                                    <TableHead>Designer</TableHead>
                                                     <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('job_type')}>
                                                         Type {sortConfig?.key === 'job_type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                                     </TableHead>
                                                     <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('status')}>
                                                         Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                    </TableHead>
+                                                    {/* NEW: Loaded Date Column */}
+                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('created_at')}>
+                                                        Loaded {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                                     </TableHead>
                                                     <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('deadline')}>
                                                         Deadline {sortConfig?.key === 'deadline' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
@@ -240,19 +244,32 @@ export default function ProjectsPage() {
                                                                 {project.name}
                                                             </span>
                                                         </TableCell>
+                                                        {/* Standardized Designer Cell */}
+                                                        <TableCell>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                                                                    {project.profiles?.full_name ? project.profiles.full_name.charAt(0).toUpperCase() : 'U'}
+                                                                </span>
+                                                                <span className="font-medium text-slate-700">{project.profiles?.full_name || 'Unassigned'}</span>
+                                                            </div>
+                                                        </TableCell>
+
                                                         <TableCell>{project.job_type}</TableCell>
                                                         <TableCell>
                                                             <Badge className={getStatusColor(project.status)} variant="outline">
                                                                 {project.status}
                                                             </Badge>
                                                         </TableCell>
-                                                        <TableCell>{formatDate(project.deadline)}</TableCell>
+
+                                                        {/* NEW: Loaded Date Cell */}
+                                                        <TableCell className="text-slate-500">{formatDate(project.created_at)}</TableCell>
+
+                                                        <TableCell className="font-medium">{formatDate(project.deadline)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <div className="flex justify-end items-center gap-2">
                                                                 <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     View →
                                                                 </Button>
-                                                                {/* NEW: List View Delete Button */}
                                                                 {isAdmin && (
                                                                     <Button
                                                                         variant="ghost"
