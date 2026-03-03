@@ -17,9 +17,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRouter } from 'next/navigation'; // Added for smooth row clicking
+import { useRouter } from 'next/navigation';
+import { Trash2Icon } from 'lucide-react'; // <-- Added Trash Icon
 
-// Helper for Badge Colors
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
@@ -29,7 +29,6 @@ const getStatusColor = (status: string) => {
     }
 };
 
-// --- NEW: Helper for Consistent Dates ---
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'None set';
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -42,34 +41,34 @@ const formatDate = (dateString: string | null) => {
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter(); // Initialize router
+    const [isAdmin, setIsAdmin] = useState(false); // <-- NEW: Admin State
+    const router = useRouter();
 
-    // State for Search & Sort
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-
-    // --- NEW: View Persistence State ---
     const [activeTab, setActiveTab] = useState('kanban');
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        // Read preference from browser storage on mount
         const savedView = localStorage.getItem('vdm-view-preference');
-        if (savedView) {
-            setActiveTab(savedView);
-        }
-        setIsMounted(true); // Tells React it's safe to render the UI
+        if (savedView) setActiveTab(savedView);
+        setIsMounted(true);
     }, []);
 
     const handleTabChange = (value: string) => {
         setActiveTab(value);
-        localStorage.setItem('vdm-view-preference', value); // Save preference
+        localStorage.setItem('vdm-view-preference', value);
     };
-    // ------------------------------------
 
     const fetchProjects = async () => {
-        // Only show loading on initial fetch, not updates
         if (projects.length === 0) setLoading(true);
+
+        // Fetch User Role for Permissions
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+            setIsAdmin(profile?.role === 'admin');
+        }
 
         const { data, error } = await supabase.from('projects').select('*');
         if (error) console.error(error);
@@ -82,18 +81,11 @@ export default function ProjectsPage() {
         fetchProjects();
     }, []);
 
-    // --- Optimistic UI Logic ---
     const handleMoveProject = async (projectId: string, newStatus: string) => {
         const previousProjects = [...projects];
+        setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, status: newStatus } : p)));
 
-        setProjects((prev) =>
-            prev.map((p) => (p.id === projectId ? { ...p, status: newStatus } : p))
-        );
-
-        const { error } = await supabase
-            .from('projects')
-            .update({ status: newStatus })
-            .eq('id', projectId);
+        const { error } = await supabase.from('projects').update({ status: newStatus }).eq('id', projectId);
 
         if (error) {
             console.error('Update failed:', error);
@@ -102,7 +94,26 @@ export default function ProjectsPage() {
         }
     };
 
-    // --- Search & Sort Logic ---
+    // --- NEW: Delete Project Function ---
+    const handleDeleteProject = async (projectId: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation(); // Prevent the row click from triggering navigation
+
+        if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted.')) {
+            return;
+        }
+
+        // Optimistic UI Removal
+        const previousProjects = [...projects];
+        setProjects(prev => prev.filter(p => p.id !== projectId));
+
+        const { error } = await supabase.from('projects').delete().eq('id', projectId);
+
+        if (error) {
+            alert('Failed to delete project: ' + error.message);
+            setProjects(previousProjects); // Revert on error
+        }
+    };
+
     const filteredProjects = useMemo(() => {
         let processed = [...projects];
 
@@ -129,9 +140,7 @@ export default function ProjectsPage() {
 
     const handleSort = (key: string) => {
         setSortConfig((current) => {
-            if (current?.key === key && current.direction === 'asc') {
-                return { key, direction: 'desc' };
-            }
+            if (current?.key === key && current.direction === 'asc') return { key, direction: 'desc' };
             return { key, direction: 'asc' };
         });
     };
@@ -140,7 +149,6 @@ export default function ProjectsPage() {
         <div className="min-h-screen bg-slate-50 p-8">
             <div className="max-w-7xl mx-auto space-y-6">
 
-                {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900">Projects</h1>
@@ -150,11 +158,10 @@ export default function ProjectsPage() {
                         <Link href="/">
                             <Button variant="outline">Back to Dashboard</Button>
                         </Link>
-                        <NewProjectDialog onProjectCreated={fetchProjects} />
+                        {isAdmin && <NewProjectDialog onProjectCreated={fetchProjects} />}
                     </div>
                 </div>
 
-                {/* Search Bar */}
                 <div className="relative">
                     <svg className="absolute left-3 top-3 h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -167,7 +174,6 @@ export default function ProjectsPage() {
                     />
                 </div>
 
-                {/* Tabs & Views */}
                 {!isMounted ? (
                     <div className="py-10 text-center text-slate-500 animate-pulse">Loading view...</div>
                 ) : (
@@ -178,8 +184,16 @@ export default function ProjectsPage() {
                         </TabsList>
 
                         <TabsContent value="kanban">
-                            {loading ? <p>Loading board...</p> : (
-                                <KanbanBoard projects={filteredProjects} onProjectMoved={handleMoveProject} />
+                            {/* Pass down isAdmin and Delete Action */}
+                            {loading ? (
+                                <p>Loading board...</p>
+                            ) : (
+                                <KanbanBoard
+                                    projects={filteredProjects}
+                                    onProjectMoved={handleMoveProject}
+                                    isAdmin={isAdmin}
+                                    onDeleteProject={handleDeleteProject}
+                                />
                             )}
                         </TabsContent>
 
@@ -234,9 +248,23 @@ export default function ProjectsPage() {
                                                         </TableCell>
                                                         <TableCell>{formatDate(project.deadline)}</TableCell>
                                                         <TableCell className="text-right">
-                                                            <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                View →
-                                                            </Button>
+                                                            <div className="flex justify-end items-center gap-2">
+                                                                <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    View →
+                                                                </Button>
+                                                                {/* NEW: List View Delete Button */}
+                                                                {isAdmin && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                        onClick={(e) => handleDeleteProject(project.id, e)}
+                                                                        title="Delete Project"
+                                                                    >
+                                                                        <Trash2Icon className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}

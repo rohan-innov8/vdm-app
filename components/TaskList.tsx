@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trash2Icon } from 'lucide-react'; // <-- New icon for deleting
 
-export function TaskList({ projectId }: { projectId: string }) {
+// We added 'isAdmin' as a prop so the parent page can tell us if the user is an admin
+export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: boolean }) {
     const [tasks, setTasks] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -21,7 +23,6 @@ export function TaskList({ projectId }: { projectId: string }) {
     const fetchTasksAndUsers = async () => {
         setLoading(true);
 
-        // 1. Fetch Tasks (and grab the user's name from the profiles table simultaneously!)
         const { data: tasksData } = await supabase
             .from('tasks')
             .select('*, profiles(id, full_name, role)')
@@ -30,7 +31,6 @@ export function TaskList({ projectId }: { projectId: string }) {
 
         setTasks(tasksData || []);
 
-        // 2. Fetch Users to populate the "Assign To" dropdown
         const { data: usersData } = await supabase
             .from('profiles')
             .select('id, full_name, role')
@@ -58,12 +58,11 @@ export function TaskList({ projectId }: { projectId: string }) {
         } else {
             setNewTaskTitle('');
             setAssigneeId('none');
-            fetchTasksAndUsers(); // Refresh the list
+            fetchTasksAndUsers();
         }
     };
 
     const handleStatusChange = async (taskId: string, newStatus: string) => {
-        // Optimistic UI update
         setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
         const { error } = await supabase
@@ -73,7 +72,20 @@ export function TaskList({ projectId }: { projectId: string }) {
 
         if (error) {
             alert('Failed to update status');
-            fetchTasksAndUsers(); // Revert on failure
+            fetchTasksAndUsers();
+        }
+    };
+
+    // --- NEW: Handle Task Deletion ---
+    const handleDeleteTask = async (taskId: string) => {
+        if (!window.confirm('Are you sure you want to delete this task?')) return;
+
+        const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+
+        if (error) {
+            alert('Failed to delete task: ' + error.message);
+        } else {
+            fetchTasksAndUsers(); // Refresh the list to remove the deleted task
         }
     };
 
@@ -122,19 +134,34 @@ export function TaskList({ projectId }: { projectId: string }) {
                                 </p>
                             </div>
 
-                            <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
-                                <SelectTrigger className={`w-[140px] h-9 text-xs font-medium ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
-                                        task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                            'bg-gray-100 text-gray-700'
-                                    }`}>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Pending">Pending</SelectItem>
-                                    <SelectItem value="In Progress">In Progress</SelectItem>
-                                    <SelectItem value="Done">Done</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2">
+                                <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
+                                    <SelectTrigger className={`w-[140px] h-9 text-xs font-medium ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
+                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                'bg-gray-100 text-gray-700'
+                                        }`}>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Pending">Pending</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="Done">Done</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {/* NEW: Show delete button ONLY if user is Admin */}
+                                {isAdmin && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleDeleteTask(task.id)}
+                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        title="Delete Task"
+                                    >
+                                        <Trash2Icon className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     ))
                 )}

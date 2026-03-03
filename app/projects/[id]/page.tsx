@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { TaskList } from '@/components/TaskList';
+import { Trash2Icon } from 'lucide-react'; // <-- New icon for deleting
 
-// --- NEW: Helper for Consistent Badge Colors ---
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
@@ -18,10 +18,8 @@ const getStatusColor = (status: string) => {
     }
 };
 
-// --- NEW: Helper for Consistent Dates ---
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'None set';
-    // Using 'en-GB' formats it nicely as "Day Month Year" (e.g., 24 Oct 2024)
     return new Date(dateString).toLocaleDateString('en-GB', {
         day: 'numeric',
         month: 'short',
@@ -35,10 +33,19 @@ export default function ProjectDetailsPage() {
     const projectId = params.id as string;
 
     const [project, setProject] = useState<any>(null);
+    const [isAdmin, setIsAdmin] = useState(false); // <-- NEW: State to track if user is Admin
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchProjectDetails() {
+        async function fetchData() {
+            // 1. Fetch current user's role to check if Admin
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                setIsAdmin(profile?.role === 'admin');
+            }
+
+            // 2. Fetch Project Details
             const { data, error } = await supabase
                 .from('projects')
                 .select('*')
@@ -55,10 +62,24 @@ export default function ProjectDetailsPage() {
             setLoading(false);
         }
 
-        if (projectId) {
-            fetchProjectDetails();
-        }
+        if (projectId) fetchData();
     }, [projectId, router]);
+
+    // --- NEW: Handle Project Deletion ---
+    const handleDeleteProject = async () => {
+        if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted. This cannot be undone.')) {
+            return; // Exit if they click "Cancel"
+        }
+
+        const { error } = await supabase.from('projects').delete().eq('id', projectId);
+
+        if (error) {
+            alert('Failed to delete project: ' + error.message);
+        } else {
+            // Redirect back to the projects list upon success
+            router.push('/projects');
+        }
+    };
 
     if (loading) return <div className="p-8 flex items-center justify-center min-h-screen text-slate-500">Loading project workspace...</div>;
     if (!project) return null;
@@ -67,12 +88,26 @@ export default function ProjectDetailsPage() {
         <div className="min-h-screen bg-slate-50 p-8">
             <div className="max-w-5xl mx-auto space-y-6">
 
-                {/* Navigation */}
-                <Link href="/projects">
-                    <Button variant="ghost" className="mb-4 text-slate-500 hover:text-slate-900 cursor-pointer">
-                        ← Back to Projects
-                    </Button>
-                </Link>
+                {/* Navigation and Actions */}
+                <div className="flex justify-between items-center mb-4">
+                    <Link href="/projects">
+                        <Button variant="ghost" className="text-slate-500 hover:text-slate-900 cursor-pointer">
+                            ← Back to Projects
+                        </Button>
+                    </Link>
+
+                    {/* NEW: Delete Project Button (Admins Only) */}
+                    {isAdmin && (
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeleteProject}
+                            className="bg-red-500 hover:bg-red-600 text-white"
+                        >
+                            <Trash2Icon className="w-4 h-4 mr-2" />
+                            Delete Project
+                        </Button>
+                    )}
+                </div>
 
                 {/* Project Header */}
                 <div className="flex justify-between items-start">
@@ -82,7 +117,6 @@ export default function ProjectDetailsPage() {
                     </div>
                     <div className="flex gap-2">
                         <Badge variant="outline">{project.job_type}</Badge>
-                        {/* APPLIED: Matching Status Badge Colors */}
                         <Badge className={getStatusColor(project.status)} variant="outline">
                             {project.status}
                         </Badge>
@@ -99,7 +133,8 @@ export default function ProjectDetailsPage() {
                                 <CardTitle>Tasks</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <TaskList projectId={projectId} />
+                                {/* Pass the isAdmin boolean to the TaskList */}
+                                <TaskList projectId={projectId} isAdmin={isAdmin} />
                             </CardContent>
                         </Card>
                     </div>
@@ -113,12 +148,10 @@ export default function ProjectDetailsPage() {
                             <CardContent className="space-y-4 text-sm">
                                 <div>
                                     <span className="text-slate-500 font-medium block">Deadline</span>
-                                    {/* APPLIED: Consistent Date Formatting */}
                                     <span className="text-slate-900 font-medium">{formatDate(project.deadline)}</span>
                                 </div>
                                 <div>
                                     <span className="text-slate-500 font-medium block">Created</span>
-                                    {/* APPLIED: Consistent Date Formatting */}
                                     <span className="text-slate-900 font-medium">{formatDate(project.created_at)}</span>
                                 </div>
                             </CardContent>

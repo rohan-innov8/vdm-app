@@ -3,16 +3,16 @@ import { useState } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useDraggable, useDroppable } from '@dnd-kit/core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Trash2Icon } from 'lucide-react';
 import Link from 'next/link';
 
-// Using the same columns, but we will pass colors dynamically now
 const COLUMNS = [
     { id: 'Pre-Production', title: 'Pre-Production', color: 'bg-gray-100' },
     { id: 'Production', title: 'Production', color: 'bg-blue-50' },
     { id: 'Post-Production', title: 'Post-Production', color: 'bg-green-50' },
 ];
 
-// --- NEW: Helper for Consistent Dates ---
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'None set';
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -22,8 +22,17 @@ const formatDate = (dateString: string | null) => {
     });
 };
 
-// Changed props: accept 'onProjectMoved' instead of doing it internally
-export function KanbanBoard({ projects, onProjectMoved }: { projects: any[], onProjectMoved: (id: string, newStatus: string) => void }) {
+export function KanbanBoard({
+    projects,
+    onProjectMoved,
+    isAdmin,
+    onDeleteProject
+}: {
+    projects: any[],
+    onProjectMoved: (id: string, newStatus: string) => void,
+    isAdmin: boolean,
+    onDeleteProject: (id: string) => void
+}) {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -35,7 +44,6 @@ export function KanbanBoard({ projects, onProjectMoved }: { projects: any[], onP
 
         const project = projects.find((p) => p.id === projectId);
 
-        // If the status is different, tell the Parent Page immediately!
         if (project && project.status !== newStatus) {
             onProjectMoved(projectId, newStatus);
         }
@@ -55,21 +63,25 @@ export function KanbanBoard({ projects, onProjectMoved }: { projects: any[], onP
                         key={col.id}
                         col={col}
                         projects={projects.filter((p) => p.status === col.id)}
+                        isAdmin={isAdmin}
+                        onDeleteProject={onDeleteProject}
                     />
                 ))}
             </div>
             <DragOverlay>
                 {activeId ? (
-                    <ProjectCard project={projects.find((p) => p.id === activeId)} />
+                    <ProjectCard
+                        project={projects.find((p) => p.id === activeId)}
+                        isAdmin={isAdmin}
+                        onDeleteProject={onDeleteProject}
+                    />
                 ) : null}
             </DragOverlay>
         </DndContext>
     );
 }
 
-// --- Sub-Components ---
-
-function Column({ col, projects }: { col: any, projects: any[] }) {
+function Column({ col, projects, isAdmin, onDeleteProject }: { col: any, projects: any[], isAdmin: boolean, onDeleteProject: (id: string) => void }) {
     const { setNodeRef, isOver } = useDroppable({ id: col.id });
 
     return (
@@ -87,14 +99,19 @@ function Column({ col, projects }: { col: any, projects: any[] }) {
             </h3>
             <div className="flex flex-col gap-3 min-h-[200px]">
                 {projects.map((project) => (
-                    <DraggableProjectCard key={project.id} project={project} />
+                    <DraggableProjectCard
+                        key={project.id}
+                        project={project}
+                        isAdmin={isAdmin}
+                        onDeleteProject={onDeleteProject}
+                    />
                 ))}
             </div>
         </div>
     );
 }
 
-function DraggableProjectCard({ project }: { project: any }) {
+function DraggableProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: project.id });
 
     const style = transform ? {
@@ -102,23 +119,24 @@ function DraggableProjectCard({ project }: { project: any }) {
     } : undefined;
 
     if (isDragging) {
-        return <div ref={setNodeRef} style={style} className="opacity-30"><ProjectCard project={project} /></div>;
+        return <div ref={setNodeRef} style={style} className="opacity-30">
+            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} />
+        </div>;
     }
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-transform">
-            <ProjectCard project={project} />
+            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} />
         </div>
     );
 }
 
-function ProjectCard({ project }: { project: any }) {
+function ProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void }) {
     if (!project) return null;
     return (
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-gray-200 cursor-grab relative">
+        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-gray-200 cursor-grab relative group">
             <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start">
                     <CardTitle className="text-sm font-semibold text-gray-900 leading-tight pr-6">
-                        {/* We wrap the name in a Link, and stop the drag event on the title itself */}
                         <Link
                             href={`/projects/${project.id}`}
                             className="hover:text-blue-600 hover:underline transition-colors"
@@ -140,15 +158,33 @@ function ProjectCard({ project }: { project: any }) {
                         {formatDate(project.deadline)}
                     </div>
 
-                    {/* NEW: Dedicated, crystal clear "View" link that won't trigger a drag event */}
-                    <Link
-                        href={`/projects/${project.id}`}
-                        className="p-1.5 -m-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
-                        onPointerDown={(e) => e.stopPropagation()} // Crucial: Prevents drag initiation
-                        title="View Project Workspace"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                    </Link>
+                    <div className="flex items-center gap-1">
+                        {/* NEW: Kanban Delete Button */}
+                        {isAdmin && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onPointerDown={(e) => e.stopPropagation()} // Crucial: Prevents drag initiation
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onDeleteProject(project.id);
+                                }}
+                                title="Delete Project"
+                            >
+                                <Trash2Icon className="h-3 w-3" />
+                            </Button>
+                        )}
+                        <Link
+                            href={`/projects/${project.id}`}
+                            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+                            onPointerDown={(e) => e.stopPropagation()}
+                            title="View Project Workspace"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                        </Link>
+                    </div>
                 </div>
             </CardContent>
         </Card>
