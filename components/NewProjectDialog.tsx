@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,32 +21,29 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+// Define your top clients here (Bram can change these names later!)
+const TOP_CLIENTS = ['Design House A', 'Interiors B', 'Architects C', 'Studio D'];
+
 export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () => void }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState<any[]>([]);
 
     // Form States
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [jobType, setJobType] = useState('Loose Item');
     const [deadline, setDeadline] = useState('');
-    const [designerId, setDesignerId] = useState<string>('none');
 
-    // Fetch team members for the Designer dropdown when dialog opens
-    useEffect(() => {
-        if (open) {
-            const fetchUsers = async () => {
-                const { data } = await supabase.from('profiles').select('id, full_name, role').order('full_name');
-                if (data) setUsers(data);
-            };
-            fetchUsers();
-        }
-    }, [open]);
+    // NEW: Client/Designer States
+    const [clientSelection, setClientSelection] = useState<string>('');
+    const [customClient, setCustomClient] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Determine which name to save
+        const finalClientName = clientSelection === 'Other' ? customClient : clientSelection;
 
         const { error } = await supabase.from('projects').insert([
             {
@@ -54,8 +51,8 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                 description,
                 job_type: jobType,
                 deadline: deadline || null,
-                status: 'Pre-Production', // Automatically enforced!
-                designer_id: designerId === 'none' ? null : designerId // Link to the user
+                status: 'Pre-Production',
+                client_name: finalClientName || null // Save the text string
             },
         ]);
 
@@ -70,7 +67,8 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
             setDescription('');
             setJobType('Loose Item');
             setDeadline('');
-            setDesignerId('none');
+            setClientSelection('');
+            setCustomClient('');
 
             if (onProjectCreated) onProjectCreated();
         }
@@ -79,7 +77,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">+ New Project</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-sm">+ New Project</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
@@ -95,25 +93,38 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" placeholder="e.g. Smith Kitchen Island" required />
                     </div>
 
-                    {/* NEW: Designer Dropdown */}
+                    {/* NEW: Designer / Client Dropdown */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="designer" className="text-right">Designer</Label>
                         <div className="col-span-3">
-                            <Select value={designerId} onValueChange={setDesignerId}>
+                            <Select value={clientSelection} onValueChange={setClientSelection}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select designer" />
+                                    <SelectValue placeholder="Select a designer or client" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none">Unassigned</SelectItem>
-                                    {users.map(u => (
-                                        <SelectItem key={u.id} value={u.id}>
-                                            {u.full_name || 'Unknown'}
-                                        </SelectItem>
+                                    {TOP_CLIENTS.map(client => (
+                                        <SelectItem key={client} value={client}>{client}</SelectItem>
                                     ))}
+                                    <SelectItem value="Other">Other (Type custom name)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
+
+                    {/* NEW: Conditionally render the custom text input if 'Other' is selected */}
+                    {clientSelection === 'Other' && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="customClient" className="text-right text-slate-400 text-xs">Custom Name</Label>
+                            <Input
+                                id="customClient"
+                                value={customClient}
+                                onChange={(e) => setCustomClient(e.target.value)}
+                                className="col-span-3"
+                                placeholder="Enter designer name..."
+                                required
+                            />
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="type" className="text-right">Job Type</Label>
