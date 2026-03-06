@@ -11,13 +11,18 @@ import { Separator } from '@/components/ui/separator';
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [projectCount, setProjectCount] = useState(0); // <--- New State for the count
+
+  // Dashboard Stats State
+  const [projectCount, setProjectCount] = useState(0);
+  const [pendingTasksCount, setPendingTasksCount] = useState(0);
+  const [productionVelocity, setProductionVelocity] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    async function getUserData() {
-      // 1. Get User
+    async function getDashboardData() {
+      // 1. Get User & Profile
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         router.push('/login');
@@ -25,29 +30,41 @@ export default function Dashboard() {
       }
       setUser(user);
 
-      // 2. Get Profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
+      if (profileData) setProfile(profileData);
 
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // 3. Get Project Count (The new part!)
-      const { count, error: countError } = await supabase
+      // 2. Get Active Project Count
+      const { count: projCount } = await supabase
         .from('projects')
-        .select('*', { count: 'exact', head: true }); // 'head: true' means "just count them, don't download the data"
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'Post-Production'); // Only count active/pre-prod
 
-      if (count !== null) {
-        setProjectCount(count);
+      if (projCount !== null) setProjectCount(projCount);
+
+      // 3. Get Task Stats for Pending Count & Velocity
+      const { data: allTasks } = await supabase
+        .from('tasks')
+        .select('status');
+
+      if (allTasks && allTasks.length > 0) {
+        // Count tasks that are NOT done
+        const pending = allTasks.filter(t => t.status !== 'Done').length;
+        setPendingTasksCount(pending);
+
+        // Calculate Velocity (% of tasks completed)
+        const done = allTasks.filter(t => t.status === 'Done').length;
+        const velocity = Math.round((done / allTasks.length) * 100);
+        setProductionVelocity(velocity);
       }
 
       setLoading(false);
     }
-    getUserData();
+
+    getDashboardData();
   }, [router]);
 
   const handleLogout = async () => {
@@ -60,7 +77,7 @@ export default function Dashboard() {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-  if (loading) return <div className="flex items-center justify-center h-screen">Loading workspace...</div>;
+  if (loading) return <div className="flex items-center justify-center h-screen text-slate-500">Loading workspace...</div>;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -80,7 +97,7 @@ export default function Dashboard() {
           </div>
           <Avatar>
             <AvatarImage src="" />
-            <AvatarFallback className="bg-blue-100 text-blue-700">
+            <AvatarFallback className="bg-blue-100 text-blue-700 font-bold text-xs">
               {getInitials(profile?.full_name || profile?.email)}
             </AvatarFallback>
           </Avatar>
@@ -98,7 +115,6 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold text-slate-900">Dashboard</h2>
             <p className="text-slate-500 mt-1">Overview of factory production and timelines.</p>
           </div>
-          {/* Only Admins can see the 'New Project' button. Note: We removed the button here since we have it on the Projects page, but you can add it back if you like! */}
         </div>
 
         <Separator />
@@ -106,16 +122,14 @@ export default function Dashboard() {
         {/* KPI Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* Active Projects - Now Clickable & Live! */}
           <Link href="/projects">
-            <Card className="hover:shadow-md transition cursor-pointer h-full">
+            <Card className="hover:shadow-md transition cursor-pointer h-full border-blue-100 bg-blue-50/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-slate-500">Active Projects</CardTitle>
+                <CardTitle className="text-sm font-medium text-blue-800">Active Projects</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* This is the variable that now holds the real number */}
-                <div className="text-4xl font-bold text-slate-900">{projectCount}</div>
-                <p className="text-xs text-slate-500 mt-1">Click to view all</p>
+                <div className="text-4xl font-bold text-blue-900">{projectCount}</div>
+                <p className="text-xs text-blue-600/80 mt-1">Currently in pipeline</p>
               </CardContent>
             </Card>
           </Link>
@@ -125,8 +139,8 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-slate-500">Pending Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-slate-900">0</div>
-              <p className="text-xs text-slate-500 mt-1">0 high priority</p>
+              <div className="text-4xl font-bold text-slate-900">{pendingTasksCount}</div>
+              <p className="text-xs text-slate-500 mt-1">Across all projects</p>
             </CardContent>
           </Card>
 
@@ -135,8 +149,8 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-slate-500">Production Velocity</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-slate-900">0%</div>
-              <p className="text-xs text-slate-500 mt-1">On schedule</p>
+              <div className="text-4xl font-bold text-slate-900">{productionVelocity}%</div>
+              <p className="text-xs text-slate-500 mt-1">Total tasks completed</p>
             </CardContent>
           </Card>
         </div>
@@ -147,7 +161,6 @@ export default function Dashboard() {
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Admin Quick Actions</h3>
             <div className="flex gap-4">
 
-              {/* Added Link to User Management */}
               <Link href="/admin/users">
                 <Card className="w-64 cursor-pointer hover:bg-slate-50 transition hover:shadow-md">
                   <CardHeader>
@@ -157,7 +170,6 @@ export default function Dashboard() {
                 </Card>
               </Link>
 
-              {/* Added Link to System Settings */}
               <Link href="/admin/settings">
                 <Card className="w-64 cursor-pointer hover:bg-slate-50 transition hover:shadow-md">
                   <CardHeader>
