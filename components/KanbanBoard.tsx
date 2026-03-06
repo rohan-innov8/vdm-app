@@ -151,7 +151,18 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                             {project.name}
                         </Link>
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px] uppercase">{project.job_type}</Badge>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <Badge variant="outline" className="text-[10px] uppercase">{project.job_type}</Badge>
+                        {project.delivery_gauteng ? (
+                            <Badge variant="outline" className="text-[9px] uppercase bg-purple-50 text-purple-700 border-purple-200 px-1.5 py-0 h-4 shadow-none">
+                                Gauteng
+                            </Badge>
+                        ) : (
+                            <Badge variant="outline" className="text-[9px] uppercase bg-gray-50 text-gray-700 border-gray-200 px-1.5 py-0 h-4 shadow-none">
+                                Outside Gauteng
+                            </Badge>
+                        )}
+                    </div>
                 </div>
                 {/* Standardized Designer Avatar */}
                 <div className="flex items-center gap-1.5 mt-2">

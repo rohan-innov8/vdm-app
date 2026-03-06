@@ -165,6 +165,21 @@ export default function ProjectDetailsPage() {
                                     <span className="text-slate-500 font-medium block">Created</span>
                                     <span className="text-slate-900 font-medium">{formatDate(project.created_at)}</span>
                                 </div>
+
+                                {/* NEW: Gauteng Delivery Indicator */}
+                                <div>
+                                    <span className="text-slate-500 font-medium block">Delivery Location</span>
+                                    <div className="mt-1">
+                                        {project.delivery_gauteng ? (
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-100">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22V2" /><path d="M7 22V2" /><path d="M7 12h10" /><path d="m10.5 7 1.5-2 1.5 2" /><path d="m10.5 17 1.5 2 1.5-2" /></svg>
+                                                Gauteng Delivery
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-600 font-medium">Outside Gauteng</span>
+                                        )}
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
 

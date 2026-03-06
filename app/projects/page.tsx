@@ -257,7 +257,20 @@ export default function ProjectsPage() {
                                                             </div>
                                                         </TableCell>
 
-                                                        <TableCell>{project.job_type}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex flex-col items-start gap-1.5">
+                                                                <span>{project.job_type}</span>
+                                                                {project.delivery_gauteng ? (
+                                                                    <Badge variant="outline" className="text-[9px] uppercase bg-purple-50 text-purple-700 border-purple-200 px-1.5 py-0 h-4 shadow-none">
+                                                                        Gauteng
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <Badge variant="outline" className="text-[9px] uppercase bg-gray-50 text-gray-700 border-gray-200 px-1.5 py-0 h-4 shadow-none">
+                                                                        Outside Gauteng
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
                                                         <TableCell>
                                                             <Badge className={getStatusColor(project.status)} variant="outline">
                                                                 {project.status}

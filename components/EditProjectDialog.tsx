@@ -35,6 +35,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
     const [deadline, setDeadline] = useState('');
     const [clientSelection, setClientSelection] = useState('');
     const [customClient, setCustomClient] = useState('');
+    const [deliveryGauteng, setDeliveryGauteng] = useState(false); // <-- NEW STATE
 
     // Pre-fill the form when the dialog opens
     useEffect(() => {
@@ -43,6 +44,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
             setDescription(project.description || '');
             setJobType(project.job_type || 'Loose Item');
             setDeadline(project.deadline || '');
+            setDeliveryGauteng(project.delivery_gauteng || false); // <-- NEW PREFILL
 
             if (TOP_CLIENTS.includes(project.client_name)) {
                 setClientSelection(project.client_name);
@@ -71,7 +73,8 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                 description,
                 job_type: jobType,
                 deadline: deadline || null,
-                client_name: finalClientName || null
+                client_name: finalClientName || null,
+                delivery_gauteng: deliveryGauteng // <-- NEW FIELD
             })
             .eq('id', project.id);
 
@@ -155,6 +158,21 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="edit-deadline" className="text-right">Deadline</Label>
                         <Input id="edit-deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="col-span-3" />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <div className="col-start-2 col-span-3 flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="edit-gauteng"
+                                checked={deliveryGauteng}
+                                onChange={(e) => setDeliveryGauteng(e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <Label htmlFor="edit-gauteng" className="text-sm font-normal cursor-pointer">
+                                Delivery in Gauteng
+                            </Label>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-4 items-start gap-4">

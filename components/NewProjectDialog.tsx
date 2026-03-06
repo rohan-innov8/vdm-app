@@ -37,6 +37,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
     // NEW: Client/Designer States
     const [clientSelection, setClientSelection] = useState<string>('');
     const [customClient, setCustomClient] = useState('');
+    const [deliveryGauteng, setDeliveryGauteng] = useState(false); // <-- NEW STATE
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,11 +53,13 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                 job_type: jobType,
                 deadline: deadline || null,
                 status: 'Pre-Production',
-                client_name: finalClientName || null // Save the text string
+                client_name: finalClientName || null,
+                delivery_gauteng: deliveryGauteng // <-- NEW FIELD
             },
         ]);
 
         setLoading(false);
+        setDeliveryGauteng(false);
 
         if (error) {
             alert('Error creating project: ' + error.message);
@@ -145,6 +148,21 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="deadline" className="text-right">Deadline</Label>
                         <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="col-span-3" />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <div className="col-start-2 col-span-3 flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="gauteng"
+                                checked={deliveryGauteng}
+                                onChange={(e) => setDeliveryGauteng(e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <Label htmlFor="gauteng" className="text-sm font-normal cursor-pointer">
+                                Delivery in Gauteng
+                            </Label>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-4 items-start gap-4">
