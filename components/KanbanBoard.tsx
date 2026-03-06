@@ -150,10 +150,8 @@ function ProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAd
                 {/* Standardized Designer Avatar */}
                 <div className="flex items-center gap-1.5 mt-2">
                     <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
-                        {/* {project.profiles?.full_name ? project.profiles.full_name.charAt(0).toUpperCase() : 'U'} */}
                         {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
                     </span>
-                    {/* <span className="text-xs font-medium text-slate-700">{project.profiles?.full_name || 'Unassigned'}</span> */}
                     <span className="text-xs font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
                 </div>
             </CardHeader>

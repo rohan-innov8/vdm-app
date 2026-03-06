@@ -72,7 +72,6 @@ export default function ProjectsPage() {
         // NEW: Fetch projects AND the associated designer's name from the profiles table
         const { data, error } = await supabase
             .from('projects')
-            // .select('*, profiles(full_name)');
             .select('*');
 
         if (error) console.error(error);
@@ -123,7 +122,6 @@ export default function ProjectsPage() {
             processed = processed.filter(p =>
                 p.name.toLowerCase().includes(lowerTerm) ||
                 p.job_type.toLowerCase().includes(lowerTerm) ||
-                // (p.profiles?.full_name && p.profiles.full_name.toLowerCase().includes(lowerTerm))
                 (p.client_name && p.client_name.toLowerCase().includes(lowerTerm))
             );
         }
@@ -250,10 +248,8 @@ export default function ProjectsPage() {
                                                         <TableCell>
                                                             <div className="flex items-center gap-1.5">
                                                                 <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
-                                                                    {/* {project.profiles?.full_name ? project.profiles.full_name.charAt(0).toUpperCase() : 'U'} */}
                                                                     {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
                                                                 </span>
-                                                                {/* <span className="font-medium text-slate-700">{project.profiles?.full_name || 'Unassigned'}</span> */}
                                                                 <span className="font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
                                                             </div>
                                                         </TableCell>
