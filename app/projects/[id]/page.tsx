@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { TaskList } from '@/components/TaskList';
-import { Trash2Icon } from 'lucide-react'; // <-- New icon for deleting
+import { Trash2Icon } from 'lucide-react';
+import { EditProjectDialog } from '@/components/EditProjectDialog'; // <-- Import the new dialog
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -33,42 +34,40 @@ export default function ProjectDetailsPage() {
     const projectId = params.id as string;
 
     const [project, setProject] = useState<any>(null);
-    const [isAdmin, setIsAdmin] = useState(false); // <-- NEW: State to track if user is Admin
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            // 1. Fetch current user's role to check if Admin
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-                setIsAdmin(profile?.role === 'admin');
-            }
-
-            // 2. Fetch Project Details
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .eq('id', projectId)
-                .single();
-
-            if (error) {
-                console.error('Error fetching project:', error);
-                alert('Project not found.');
-                router.push('/projects');
-            } else {
-                setProject(data);
-            }
-            setLoading(false);
+    // We wrap this in useCallback so we can pass it to the Edit Dialog to trigger a refresh
+    const fetchProjectDetails = useCallback(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+            setIsAdmin(profile?.role === 'admin');
         }
 
-        if (projectId) fetchData();
+        const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('id', projectId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching project:', error);
+            alert('Project not found.');
+            router.push('/projects');
+        } else {
+            setProject(data);
+        }
+        setLoading(false);
     }, [projectId, router]);
 
-    // --- NEW: Handle Project Deletion ---
+    useEffect(() => {
+        if (projectId) fetchProjectDetails();
+    }, [projectId, fetchProjectDetails]);
+
     const handleDeleteProject = async () => {
         if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted. This cannot be undone.')) {
-            return; // Exit if they click "Cancel"
+            return;
         }
 
         const { error } = await supabase.from('projects').delete().eq('id', projectId);
@@ -76,7 +75,6 @@ export default function ProjectDetailsPage() {
         if (error) {
             alert('Failed to delete project: ' + error.message);
         } else {
-            // Redirect back to the projects list upon success
             router.push('/projects');
         }
     };
@@ -96,16 +94,21 @@ export default function ProjectDetailsPage() {
                         </Button>
                     </Link>
 
-                    {/* NEW: Delete Project Button (Admins Only) */}
+                    {/* Admin Actions Group */}
                     {isAdmin && (
-                        <Button
-                            variant="destructive"
-                            onClick={handleDeleteProject}
-                            className="bg-red-500 hover:bg-red-600 text-white"
-                        >
-                            <Trash2Icon className="w-4 h-4 mr-2" />
-                            Delete Project
-                        </Button>
+                        <div className="flex gap-2">
+                            {/* NEW: Edit Project Dialog */}
+                            <EditProjectDialog project={project} onProjectUpdated={fetchProjectDetails} />
+
+                            <Button
+                                variant="destructive"
+                                onClick={handleDeleteProject}
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                            >
+                                <Trash2Icon className="w-4 h-4 mr-2" />
+                                Delete Project
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -133,7 +136,6 @@ export default function ProjectDetailsPage() {
                                 <CardTitle>Tasks</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {/* Pass the isAdmin boolean to the TaskList */}
                                 <TaskList projectId={projectId} isAdmin={isAdmin} />
                             </CardContent>
                         </Card>

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Trash2Icon, CalendarIcon } from 'lucide-react';
+import { EditTaskDialog } from '@/components/EditTaskDialog';
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'No deadline';
@@ -204,8 +205,8 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 <div className="flex items-center justify-between gap-2 pt-2 border-t">
                                     <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
                                         <SelectTrigger className={`w-[130px] h-8 text-xs font-medium ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
-                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                'bg-gray-100 text-gray-700'
+                                                task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                    'bg-gray-100 text-gray-700'
                                             }`}>
                                             <SelectValue />
                                         </SelectTrigger>
@@ -217,15 +218,18 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                     </Select>
 
                                     {isAdmin && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDeleteTask(task.id)}
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
-                                            title="Delete Task"
-                                        >
-                                            <Trash2Icon className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            <EditTaskDialog task={task} users={users} onTaskUpdated={fetchTasksAndUsers} />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDeleteTask(task.id)}
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
+                                                title="Delete Task"
+                                            >
+                                                <Trash2Icon className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
 

@@ -18,7 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
-import { Trash2Icon } from 'lucide-react';
+import { Trash2Icon, PencilIcon } from 'lucide-react';
+import { EditProjectDialog } from '@/components/EditProjectDialog';
+
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -191,6 +193,7 @@ export default function ProjectsPage() {
                                     onProjectMoved={handleMoveProject}
                                     isAdmin={isAdmin}
                                     onDeleteProject={handleDeleteProject}
+                                    onProjectUpdated={fetchProjects} // <-- NEW 
                                 />
                             )}
                         </TabsContent>
@@ -271,15 +274,34 @@ export default function ProjectsPage() {
                                                                     View →
                                                                 </Button>
                                                                 {isAdmin && (
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                        onClick={(e) => handleDeleteProject(project.id, e)}
-                                                                        title="Delete Project"
-                                                                    >
-                                                                        <Trash2Icon className="h-4 w-4" />
-                                                                    </Button>
+                                                                    <>
+                                                                        <EditProjectDialog
+                                                                            project={project}
+                                                                            onProjectUpdated={fetchProjects}
+                                                                            customTrigger={
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                    }}
+                                                                                    title="Edit Project"
+                                                                                >
+                                                                                    <PencilIcon className="h-4 w-4" />
+                                                                                </Button>
+                                                                            }
+                                                                        />
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            onClick={(e) => handleDeleteProject(project.id, e)}
+                                                                            title="Delete Project"
+                                                                        >
+                                                                            <Trash2Icon className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         </TableCell>

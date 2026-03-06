@@ -4,8 +4,9 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useDraggable, us
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2Icon } from 'lucide-react';
+import { Trash2Icon, PencilIcon } from 'lucide-react';
 import Link from 'next/link';
+import { EditProjectDialog } from '@/components/EditProjectDialog';
 
 const COLUMNS = [
     { id: 'Pre-Production', title: 'Pre-Production', color: 'bg-gray-100' },
@@ -26,12 +27,14 @@ export function KanbanBoard({
     projects,
     onProjectMoved,
     isAdmin,
-    onDeleteProject
+    onDeleteProject,
+    onProjectUpdated // <-- ADDED
 }: {
     projects: any[],
     onProjectMoved: (id: string, newStatus: string) => void,
     isAdmin: boolean,
-    onDeleteProject: (id: string) => void
+    onDeleteProject: (id: string) => void,
+    onProjectUpdated: () => void // <-- ADDED
 }) {
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -65,6 +68,7 @@ export function KanbanBoard({
                         projects={projects.filter((p) => p.status === col.id)}
                         isAdmin={isAdmin}
                         onDeleteProject={onDeleteProject}
+                        onProjectUpdated={onProjectUpdated} // <-- ADDED
                     />
                 ))}
             </div>
@@ -74,6 +78,7 @@ export function KanbanBoard({
                         project={projects.find((p) => p.id === activeId)}
                         isAdmin={isAdmin}
                         onDeleteProject={onDeleteProject}
+                        onProjectUpdated={onProjectUpdated} // <-- ADDED
                     />
                 ) : null}
             </DragOverlay>
@@ -81,7 +86,7 @@ export function KanbanBoard({
     );
 }
 
-function Column({ col, projects, isAdmin, onDeleteProject }: { col: any, projects: any[], isAdmin: boolean, onDeleteProject: (id: string) => void }) {
+function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: { col: any, projects: any[], isAdmin: boolean, onDeleteProject: (id: string) => void, onProjectUpdated: () => void }) {
     const { setNodeRef, isOver } = useDroppable({ id: col.id });
 
     return (
@@ -104,6 +109,7 @@ function Column({ col, projects, isAdmin, onDeleteProject }: { col: any, project
                         project={project}
                         isAdmin={isAdmin}
                         onDeleteProject={onDeleteProject}
+                        onProjectUpdated={onProjectUpdated} // <-- ADDED
                     />
                 ))}
             </div>
@@ -111,7 +117,7 @@ function Column({ col, projects, isAdmin, onDeleteProject }: { col: any, project
     );
 }
 
-function DraggableProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void }) {
+function DraggableProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void, onProjectUpdated: () => void }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: project.id });
 
     const style = transform ? {
@@ -120,17 +126,17 @@ function DraggableProjectCard({ project, isAdmin, onDeleteProject }: { project: 
 
     if (isDragging) {
         return <div ref={setNodeRef} style={style} className="opacity-30">
-            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} />
+            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} />
         </div>;
     }
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-transform">
-            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} />
+            <ProjectCard project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} />
         </div>
     );
 }
 
-function ProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void }) {
+function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { project: any, isAdmin: boolean, onDeleteProject: (id: string) => void, onProjectUpdated: () => void }) {
     if (!project) return null;
     return (
         <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-gray-200 cursor-grab relative group">
@@ -175,20 +181,40 @@ function ProjectCard({ project, isAdmin, onDeleteProject }: { project: any, isAd
 
                     <div className="flex items-center gap-1 self-end">
                         {isAdmin && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onDeleteProject(project.id);
-                                }}
-                                title="Delete Project"
-                            >
-                                <Trash2Icon className="h-3 w-3" />
-                            </Button>
+                            <>
+                                <EditProjectDialog
+                                    project={project}
+                                    onProjectUpdated={onProjectUpdated}
+                                    customTrigger={
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                            title="Edit Project"
+                                        >
+                                            <PencilIcon className="h-3 w-3" />
+                                        </Button>
+                                    }
+                                />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        onDeleteProject(project.id);
+                                    }}
+                                    title="Delete Project"
+                                >
+                                    <Trash2Icon className="h-3 w-3" />
+                                </Button>
+                            </>
                         )}
                         <Link
                             href={`/projects/${project.id}`}
