@@ -21,48 +21,49 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Trash2Icon } from 'lucide-react';
+import { deleteUserAccount } from '@/app/actions/deleteUser'; // <-- Import the secure action
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        async function fetchUsers() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                router.push('/login');
-                return;
-            }
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            if (profile?.role !== 'admin') {
-                alert('Unauthorized. Admins only.');
-                router.push('/');
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) console.error(error);
-            else setUsers(data || []);
-
-            setLoading(false);
+    const fetchUsers = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            router.push('/login');
+            return;
         }
 
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.role !== 'admin') {
+            alert('Unauthorized. Admins only.');
+            router.push('/');
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) console.error(error);
+        else setUsers(data || []);
+
+        setLoading(false);
+    };
+
+    useEffect(() => {
         fetchUsers();
     }, [router]);
 
     const handleRoleChange = async (userId: string, currentRole: string, newRole: string) => {
-        // SAFETY CHECK: Prevent downgrading the last admin
         if (currentRole === 'admin' && newRole !== 'admin') {
             const adminCount = users.filter((u) => u.role === 'admin').length;
             if (adminCount <= 1) {
@@ -71,9 +72,6 @@ export default function UserManagementPage() {
             }
         }
 
-        // 1. Tell the user we are working on it (Optional: you could add a local loading state here)
-
-        // 2. Ask the database to make the change FIRST
         const { error } = await supabase
             .from('profiles')
             .update({ role: newRole })
@@ -83,19 +81,35 @@ export default function UserManagementPage() {
             alert('Failed to update role: ' + error.message);
         }
 
-        // 3. Force a fresh download of the "Truth" from the database. 
-        // If the database silently blocked the change, this will instantly snap the UI back to reality.
-        const { data: refreshedUsers } = await supabase
-            .from('profiles')
-            .select('*')
-            .order('created_at', { ascending: false });
+        fetchUsers(); // Refresh the data
+    };
 
-        if (refreshedUsers) {
-            setUsers(refreshedUsers);
+    // NEW: Handle User Deletion securely
+    const handleDeleteUser = async (userId: string, currentRole: string) => {
+        // Safety check 1: Don't delete the last admin
+        if (currentRole === 'admin') {
+            const adminCount = users.filter((u) => u.role === 'admin').length;
+            if (adminCount <= 1) {
+                alert('Action blocked: You cannot delete the last admin in the system.');
+                return;
+            }
+        }
+
+        // Safety check 2: Confirmation
+        if (!window.confirm('Are you ABSOLUTELY sure you want to delete this user? Their account and access will be permanently removed.')) {
+            return;
+        }
+
+        try {
+            // Trigger the secure server-side deletion
+            await deleteUserAccount(userId);
+            // Refresh the table
+            fetchUsers();
+        } catch (error: any) {
+            alert('Failed to delete user: ' + error.message);
         }
     };
 
-    // FIX 1: Centered loading state to match the dashboard
     if (loading) return <div className="flex items-center justify-center h-screen text-slate-500">Loading users...</div>;
 
     return (
@@ -108,7 +122,7 @@ export default function UserManagementPage() {
                         <p className="text-slate-500">Manage access levels for your team.</p>
                     </div>
                     <Link href="/">
-                        <Button variant="outline">Back to Dashboard</Button>
+                        <Button variant="outline" className='cursor-pointer'>Back to Dashboard</Button>
                     </Link>
                 </div>
 
@@ -123,8 +137,8 @@ export default function UserManagementPage() {
                                     <TableHead>Name</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Current Role</TableHead>
-                                    {/* FIX 2: Aligned the column header to the right */}
                                     <TableHead className="text-right">Change Role</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -137,13 +151,12 @@ export default function UserManagementPage() {
                                                 {u.role}
                                             </Badge>
                                         </TableCell>
-                                        {/* FIX 2: Aligned the dropdown to the right */}
                                         <TableCell className="text-right">
                                             <Select
                                                 value={u.role}
                                                 onValueChange={(value) => handleRoleChange(u.id, u.role, value)}
                                             >
-                                                <SelectTrigger className="w-[140px] ml-auto">
+                                                <SelectTrigger className="w-[140px] ml-auto cursor-pointer">
                                                     <SelectValue placeholder="Select role" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -151,6 +164,17 @@ export default function UserManagementPage() {
                                                     <SelectItem value="viewer">Viewer</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                                                onClick={() => handleDeleteUser(u.id, u.role)}
+                                                title="Delete User"
+                                            >
+                                                <Trash2Icon className="h-4 w-4" />
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
