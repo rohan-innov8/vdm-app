@@ -77,6 +77,9 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
         }
     };
 
+    // Determine if the form meets the minimum requirements to be submitted
+    const isFormValid = name.trim() !== '' && (clientSelection === 'Other' ? customClient.trim() !== '' : true);
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -171,7 +174,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <Button type="submit" disabled={loading} className="bg-blue-600 text-white cursor-pointer">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-blue-600 text-white cursor-pointer">
                             {loading ? 'Saving...' : 'Create Job Card'}
                         </Button>
                     </div>
