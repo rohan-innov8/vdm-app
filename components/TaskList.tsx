@@ -115,7 +115,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">+ New Task</Button>
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm cursor-pointer">+ New Task</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[450px]">
                         <DialogHeader>
@@ -204,9 +204,9 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 {/* Actions */}
                                 <div className="flex items-center justify-between gap-2 pt-2 border-t">
                                     <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
-                                        <SelectTrigger className={`w-[130px] h-8 text-xs font-medium ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                    'bg-gray-100 text-gray-700'
+                                        <SelectTrigger className={`w-[130px] h-8 text-xs font-medium cursor-pointer ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
+                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                'bg-gray-100 text-gray-700'
                                             }`}>
                                             <SelectValue />
                                         </SelectTrigger>
@@ -224,7 +224,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDeleteTask(task.id)}
-                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 cursor-pointer"
                                                 title="Delete Task"
                                             >
                                                 <Trash2Icon className="h-4 w-4" />

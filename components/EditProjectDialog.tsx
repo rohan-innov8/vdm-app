@@ -92,7 +92,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {customTrigger ? customTrigger : (
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2 cursor-pointer">
                         <EditIcon className="h-4 w-4" />
                         Edit Job
                     </Button>
@@ -181,7 +181,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <Button type="submit" disabled={loading} className="bg-blue-600 text-white">
+                        <Button type="submit" disabled={loading} className="bg-blue-600 text-white cursor-pointer cursor-pointer">
                             {loading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>

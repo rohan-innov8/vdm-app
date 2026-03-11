@@ -58,7 +58,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
+                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-8 w-8 cursor-pointer"
                     title="Edit Task"
                 >
                     <PencilIcon className="h-4 w-4" />

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { TaskList } from '@/components/TaskList';
 import { Trash2Icon } from 'lucide-react';
 import { EditProjectDialog } from '@/components/EditProjectDialog'; // <-- Import the new dialog
+import { ProjectFiles } from '@/components/ProjectFiles';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,7 +104,7 @@ export default function ProjectDetailsPage() {
                             <Button
                                 variant="destructive"
                                 onClick={handleDeleteProject}
-                                className="bg-red-500 hover:bg-red-600 text-white"
+                                className="bg-red-500 hover:bg-red-600 text-white cursor-pointer"
                             >
                                 <Trash2Icon className="w-4 h-4 mr-2" />
                                 Delete Project
@@ -126,12 +127,11 @@ export default function ProjectDetailsPage() {
                     </div>
                 </div>
 
-                {/* Layout Grid for Tasks and Files */}
+                {/* TOP SECTION: Tasks and Sidebar */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-
-                    {/* Main Column */}
+                    {/* Main Column: Tasks */}
                     <div className="md:col-span-2 space-y-6">
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>Tasks</CardTitle>
                             </CardHeader>
@@ -141,15 +141,15 @@ export default function ProjectDetailsPage() {
                         </Card>
                     </div>
 
-                    {/* Sidebar */}
+                    {/* Sidebar: Project Info */}
                     <div className="space-y-6">
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>Project Info</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4 text-sm">
                                 <div>
-                                    <span className="text-slate-500 font-medium block mb-1">Designer</span>
+                                    <span className="text-slate-500 font-medium block mb-1">Designer / Client</span>
                                     <div className="flex items-center gap-1.5">
                                         <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
                                             {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
@@ -165,8 +165,7 @@ export default function ProjectDetailsPage() {
                                     <span className="text-slate-500 font-medium block">Created</span>
                                     <span className="text-slate-900 font-medium">{formatDate(project.created_at)}</span>
                                 </div>
-
-                                {/* NEW: Gauteng Delivery Indicator */}
+                                {/* Gauteng Delivery Indicator */}
                                 <div>
                                     <span className="text-slate-500 font-medium block">Delivery Location</span>
                                     <div className="mt-1">
@@ -182,17 +181,19 @@ export default function ProjectDetailsPage() {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Files & Assets</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-slate-500">File uploads coming soon...</p>
-                            </CardContent>
-                        </Card>
                     </div>
+                </div>
 
+                {/* BOTTOM SECTION: Digital Asset Management (Full Width) */}
+                <div className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Digital Assets & Files</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ProjectFiles projectId={projectId} isAdmin={isAdmin} />
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>

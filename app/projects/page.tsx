@@ -159,7 +159,7 @@ export default function ProjectsPage() {
                     </div>
                     <div className="flex gap-2 w-full md:w-auto">
                         <Link href="/">
-                            <Button variant="outline">Back to Dashboard</Button>
+                            <Button variant="outline" className='cursor-pointer'>Back to Dashboard</Button>
                         </Link>
                         {isAdmin && <NewProjectDialog onProjectCreated={fetchProjects} />}
                     </div>
@@ -283,7 +283,7 @@ export default function ProjectsPage() {
                                                         <TableCell className="font-medium">{formatDate(project.deadline)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <div className="flex justify-end items-center gap-2">
-                                                                <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                                                                     View →
                                                                 </Button>
                                                                 {isAdmin && (
@@ -295,7 +295,7 @@ export default function ProjectsPage() {
                                                                                 <Button
                                                                                     variant="ghost"
                                                                                     size="icon"
-                                                                                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
                                                                                     }}
@@ -308,7 +308,7 @@ export default function ProjectsPage() {
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="icon"
-                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                                                             onClick={(e) => handleDeleteProject(project.id, e)}
                                                                             title="Delete Project"
                                                                         >

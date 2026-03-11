@@ -171,7 +171,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <Button type="submit" disabled={loading} className="bg-blue-600 text-white">
+                        <Button type="submit" disabled={loading} className="bg-blue-600 text-white cursor-pointer">
                             {loading ? 'Saving...' : 'Create Job Card'}
                         </Button>
                     </div>

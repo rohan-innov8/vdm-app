@@ -214,7 +214,7 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer cursor-pointer"
                                     onPointerDown={(e) => e.stopPropagation()}
                                     onClick={(e) => {
                                         e.preventDefault();
