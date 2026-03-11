@@ -115,7 +115,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm cursor-pointer">+ New Task</Button>
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer">+ New Task</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[450px]">
                         <DialogHeader>
@@ -157,7 +157,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 <Textarea id="desc" value={newTaskDesc} onChange={(e) => setNewTaskDesc(e.target.value)} placeholder="Provide detailed instructions..." rows={3} />
                             </div>
 
-                            <Button type="submit" disabled={!newTaskTitle.trim()} className="w-full mt-2 bg-blue-600 text-white">
+                            <Button type="submit" disabled={!newTaskTitle.trim()} className="w-full mt-2 bg-indigo-600 text-white">
                                 Save Task
                             </Button>
                         </form>
@@ -194,7 +194,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                     )}
 
                                     <div className="mt-3 flex items-center gap-1.5">
-                                        <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                                        <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
                                             {task.profiles?.full_name ? task.profiles.full_name.charAt(0).toUpperCase() : 'U'}
                                         </span>
                                         <span className="text-xs font-medium text-slate-700">{task.profiles?.full_name || 'Unassigned'}</span>
@@ -205,7 +205,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 <div className="flex items-center justify-between gap-2 pt-2 border-t">
                                     <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
                                         <SelectTrigger className={`w-[130px] h-8 text-xs font-medium cursor-pointer ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
-                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                            task.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                                                 'bg-gray-100 text-gray-700'
                                             }`}>
                                             <SelectValue />

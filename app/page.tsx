@@ -84,7 +84,7 @@ export default function Dashboard() {
       {/* Top Navigation */}
       <header className="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="bg-blue-600 w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="bg-orange-600 w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold">
             B
           </div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">VDM App</h1>
@@ -97,7 +97,7 @@ export default function Dashboard() {
           </div>
           <Avatar>
             <AvatarImage src="" />
-            <AvatarFallback className="bg-blue-100 text-blue-700 font-bold text-xs">
+            <AvatarFallback className="bg-orange-100 text-orange-700 font-bold text-xs">
               {getInitials(profile?.full_name || profile?.email)}
             </AvatarFallback>
           </Avatar>
@@ -123,13 +123,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           <Link href="/projects">
-            <Card className="hover:shadow-md transition cursor-pointer h-full border-blue-100 bg-blue-50/50">
+            <Card className="hover:shadow-md transition cursor-pointer h-full border-orange-100 bg-orange-50/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-blue-800">Active Projects</CardTitle>
+                <CardTitle className="text-sm font-medium text-orange-800">Active Projects</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-blue-900">{projectCount}</div>
-                <p className="text-xs text-blue-600/80 mt-1">Currently in pipeline</p>
+                <div className="text-4xl font-bold text-orange-900">{projectCount}</div>
+                <p className="text-xs text-orange-600/80 mt-1">Currently in pipeline</p>
               </CardContent>
             </Card>
           </Link>

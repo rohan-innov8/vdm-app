@@ -58,7 +58,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-8 w-8 cursor-pointer"
+                    className="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 h-8 w-8 cursor-pointer"
                     title="Edit Task"
                 >
                     <PencilIcon className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
                         <Textarea id="edit-task-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
                     </div>
 
-                    <Button type="submit" disabled={loading || !title.trim()} className="w-full mt-2 bg-blue-600 text-white">
+                    <Button type="submit" disabled={loading || !title.trim()} className="w-full mt-2 bg-indigo-600 text-white">
                         {loading ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </form>

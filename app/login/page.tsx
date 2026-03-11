@@ -43,7 +43,7 @@ export default function LoginPage() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-black"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             placeholder="name@company.com"
                         />
                     </div>
@@ -55,7 +55,7 @@ export default function LoginPage() {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-black"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             placeholder="••••••••"
                         />
                     </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50 mt-6"
+                        className="w-full bg-indigo-600 text-white py-2.5 rounded-md hover:bg-indigo-700 transition font-medium disabled:opacity-50 mt-6"
                     >
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
                 <div className="mt-6 text-center text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link href="/register" className="text-blue-600 hover:underline font-medium">
+                    <Link href="/register" className="text-indigo-600 hover:underline font-medium">
                         Create one
                     </Link>
                 </div>

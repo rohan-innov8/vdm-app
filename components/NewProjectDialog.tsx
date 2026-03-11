@@ -83,7 +83,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-sm">+ New Project</Button>
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white cursor-pointer shadow-sm">+ New Project</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
@@ -160,7 +160,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                                 id="gauteng"
                                 checked={deliveryGauteng}
                                 onChange={(e) => setDeliveryGauteng(e.target.checked)}
-                                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer"
                             />
                             <Label htmlFor="gauteng" className="text-sm font-normal cursor-pointer">
                                 Delivery in Gauteng
@@ -174,7 +174,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <Button type="submit" disabled={loading || !isFormValid} className="bg-blue-600 text-white cursor-pointer">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white cursor-pointer">
                             {loading ? 'Saving...' : 'Create Job Card'}
                         </Button>
                     </div>

@@ -128,7 +128,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
 
             {/* Upload Zone */}
             <div
-                className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-blue-50 hover:border-blue-400 transition-colors cursor-pointer group bg-white"
+                className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-indigo-50 hover:border-indigo-400 transition-colors cursor-pointer group bg-white"
                 onClick={() => fileInputRef.current?.click()}
             >
                 <input
@@ -140,12 +140,12 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                 />
                 {uploading ? (
                     <div className="flex flex-col items-center justify-center text-slate-500 gap-3">
-                        <Loader2Icon className="h-8 w-8 animate-spin text-blue-600" />
+                        <Loader2Icon className="h-8 w-8 animate-spin text-indigo-600" />
                         <p className="text-sm font-medium text-slate-700">{uploadProgress}</p>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="p-3 bg-blue-100 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
+                        <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full group-hover:scale-110 transition-transform">
                             <UploadCloudIcon className="h-6 w-6" />
                         </div>
                         <p className="text-sm font-medium text-slate-700 mt-2">Click or drag files to upload</p>
@@ -179,7 +179,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                                         ) : type === 'audio' ? (
                                             <MusicIcon className="h-10 w-10 text-purple-500" />
                                         ) : type === 'text' ? (
-                                            <FileTextIcon className="h-10 w-10 text-blue-400" />
+                                            <FileTextIcon className="h-10 w-10 text-indigo-400" />
                                         ) : (
                                             <FileIcon className="h-10 w-10 text-slate-400" />
                                         )}

@@ -10,7 +10,7 @@ import { EditProjectDialog } from '@/components/EditProjectDialog';
 
 const COLUMNS = [
     { id: 'Pre-Production', title: 'Pre-Production', color: 'bg-gray-100' },
-    { id: 'Production', title: 'Production', color: 'bg-blue-50' },
+    { id: 'Production', title: 'Production', color: 'bg-indigo-50' },
     { id: 'Post-Production', title: 'Post-Production', color: 'bg-green-50' },
 ];
 
@@ -145,7 +145,7 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                     <CardTitle className="text-sm font-semibold text-gray-900 leading-tight pr-6">
                         <Link
                             href={`/projects/${project.id}`}
-                            className="hover:text-blue-600 hover:underline transition-colors"
+                            className="hover:text-indigo-600 hover:underline transition-colors"
                             onPointerDown={(e) => e.stopPropagation()}
                         >
                             {project.name}
@@ -166,7 +166,7 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                 </div>
                 {/* Standardized Designer Avatar */}
                 <div className="flex items-center gap-1.5 mt-2">
-                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
                         {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
                     </span>
                     <span className="text-xs font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
@@ -200,7 +200,7 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="h-7 w-7 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"
                                             onPointerDown={(e) => e.stopPropagation()}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -229,7 +229,7 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated }: { 
                         )}
                         <Link
                             href={`/projects/${project.id}`}
-                            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+                            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-indigo-600 transition-colors"
                             onPointerDown={(e) => e.stopPropagation()}
                             title="View Project Workspace"
                         >

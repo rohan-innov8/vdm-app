@@ -25,7 +25,7 @@ import { EditProjectDialog } from '@/components/EditProjectDialog';
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
-        case 'Production': return 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200';
+        case 'Production': return 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200';
         case 'Post-Production': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
         default: return 'bg-gray-100 text-gray-800';
     }
@@ -243,14 +243,14 @@ export default function ProjectsPage() {
                                                         onClick={() => router.push(`/projects/${project.id}`)}
                                                     >
                                                         <TableCell className="font-medium">
-                                                            <span className="group-hover:text-blue-600 group-hover:underline transition-colors">
+                                                            <span className="group-hover:text-orange-600 group-hover:underline transition-colors">
                                                                 {project.name}
                                                             </span>
                                                         </TableCell>
                                                         {/* Standardized Designer Cell */}
                                                         <TableCell>
                                                             <div className="flex items-center gap-1.5">
-                                                                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                                                                <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-[10px]">
                                                                     {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
                                                                 </span>
                                                                 <span className="font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
@@ -283,7 +283,7 @@ export default function ProjectsPage() {
                                                         <TableCell className="font-medium">{formatDate(project.deadline)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <div className="flex justify-end items-center gap-2">
-                                                                <Button variant="ghost" size="sm" className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                                                <Button variant="ghost" size="sm" className="text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                                                                     View →
                                                                 </Button>
                                                                 {isAdmin && (
@@ -295,7 +295,7 @@ export default function ProjectsPage() {
                                                                                 <Button
                                                                                     variant="ghost"
                                                                                     size="icon"
-                                                                                    className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                                    className="text-slate-400 hover:text-orange-600 hover:bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
                                                                                     }}

@@ -170,7 +170,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                                 id="edit-gauteng"
                                 checked={deliveryGauteng}
                                 onChange={(e) => setDeliveryGauteng(e.target.checked)}
-                                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer"
                             />
                             <Label htmlFor="edit-gauteng" className="text-sm font-normal cursor-pointer">
                                 Delivery in Gauteng
@@ -184,7 +184,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     </div>
 
                     <div className="flex justify-end mt-4">
-                        <Button type="submit" disabled={loading || !isFormValid} className="bg-blue-600 text-white cursor-pointer">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white cursor-pointer">
                             {loading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>

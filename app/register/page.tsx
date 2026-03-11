@@ -48,7 +48,7 @@ export default function RegisterPage() {
                             required
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-black"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             placeholder="John Doe"
                         />
                     </div>
@@ -60,7 +60,7 @@ export default function RegisterPage() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-black"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             placeholder="worker@minkelis.co.za"
                         />
                     </div>
@@ -73,7 +73,7 @@ export default function RegisterPage() {
                             minLength={6}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none text-black"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             placeholder="••••••••"
                         />
                     </div>
@@ -81,7 +81,7 @@ export default function RegisterPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700 transition font-medium disabled:opacity-50 mt-6"
+                        className="w-full bg-indigo-600 text-white py-2.5 rounded-md hover:bg-indigo-700 transition font-medium disabled:opacity-50 mt-6"
                     >
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
 
                 <div className="mt-6 text-center text-sm text-gray-600">
                     Already have an account?{' '}
-                    <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                    <Link href="/login" className="text-indigo-600 hover:underline font-medium">
                         Log in
                     </Link>
                 </div>

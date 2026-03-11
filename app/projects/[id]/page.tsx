@@ -14,7 +14,7 @@ import { ProjectFiles } from '@/components/ProjectFiles';
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
-        case 'Production': return 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200';
+        case 'Production': return 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200';
         case 'Post-Production': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
         default: return 'bg-gray-100 text-gray-800';
     }
@@ -151,7 +151,7 @@ export default function ProjectDetailsPage() {
                                 <div>
                                     <span className="text-slate-500 font-medium block mb-1">Designer / Client</span>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                                        <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
                                             {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
                                         </span>
                                         <span className="font-medium text-slate-900">{project.client_name || 'Unassigned'}</span>
