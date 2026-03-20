@@ -26,7 +26,10 @@ const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
         case 'Production': return 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200';
-        case 'Post-Production': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
+        case 'Prep / Pre-assemble': return 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200';
+        case 'Installation': return 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200';
+        case 'Snags': return 'bg-pink-50 text-pink-700 hover:bg-pink-100 border-pink-200';
+        case 'Completed': return 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200';
         default: return 'bg-gray-100 text-gray-800';
     }
 };

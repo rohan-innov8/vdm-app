@@ -8,7 +8,9 @@ import { EditProjectDialog } from '@/components/EditProjectDialog';
 const COLUMNS = [
     { id: 'Pre-Production', title: 'Pre-Production', color: 'border-l-slate-300' },
     { id: 'Production', title: 'Production', color: 'border-l-orange-400' },
-    { id: 'Post-Production', title: 'Post-Production', color: 'border-l-indigo-400' },
+    { id: 'Prep / Pre-assemble', title: 'Prep / Pre-assemble', color: 'border-l-yellow-400' },
+    { id: 'Installation', title: 'Installation', color: 'border-l-indigo-400' },
+    { id: 'Snags', title: 'Snags', color: 'border-l-pink-500' },
     { id: 'Completed', title: 'Completed', color: 'border-l-emerald-500' },
 ];
 

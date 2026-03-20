@@ -8,12 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-// Map the stages to the exact colors used on the Kanban Board
 const getStageColor = (stage: string) => {
     switch (stage) {
         case 'Pre-Production': return 'border-l-slate-300';
         case 'Production': return 'border-l-orange-400';
-        case 'Post-Production': return 'border-l-indigo-400';
+        case 'Prep / Pre-assemble': return 'border-l-yellow-400';
+        case 'Installation': return 'border-l-indigo-400';
+        case 'Snags': return 'border-l-pink-500';
         case 'Completed': return 'border-l-emerald-500';
         default: return 'border-l-slate-200';
     }
@@ -55,7 +56,9 @@ export default function GlobalTasksPage() {
     const groupedTasks = {
         'Pre-Production': tasks.filter(t => t.projects?.status === 'Pre-Production'),
         'Production': tasks.filter(t => t.projects?.status === 'Production'),
-        'Post-Production': tasks.filter(t => t.projects?.status === 'Post-Production'),
+        'Prep / Pre-assemble': tasks.filter(t => t.projects?.status === 'Prep / Pre-assemble'),
+        'Installation': tasks.filter(t => t.projects?.status === 'Installation'),
+        'Snags': tasks.filter(t => t.projects?.status === 'Snags'),
         'Completed': tasks.filter(t => t.projects?.status === 'Completed')
     };
 

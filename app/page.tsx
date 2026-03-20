@@ -41,7 +41,7 @@ export default function Dashboard() {
       const { count: projCount } = await supabase
         .from('projects')
         .select('*', { count: 'exact', head: true })
-        .neq('status', 'Post-Production'); // Only count active/pre-prod
+        .neq('status', 'Completed');
 
       if (projCount !== null) setProjectCount(projCount);
 
