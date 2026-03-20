@@ -171,19 +171,19 @@ export default function ProjectDetailsPage() {
                                     <>
                                         <div className="pt-2 mt-2 border-t border-slate-100">
                                             <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                                                Deposit Received <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                                Deposit Received <span title="Admin Only"><LockIcon className="w-3 h-3 text-slate-300" /></span>
                                             </span>
                                             <span className="text-slate-900 font-medium">{formatDate(project.deposit_received_at)}</span>
                                         </div>
                                         <div>
                                             <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                                                Drawings Received <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                                Drawings Received <span title="Admin Only"><LockIcon className="w-3 h-3 text-slate-300" /></span>
                                             </span>
                                             <span className="text-slate-900 font-medium">{formatDate(project.drawings_received_at)}</span>
                                         </div>
                                         <div>
                                             <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                                                Install / Delivery <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                                Install / Delivery <span title="Admin Only"><LockIcon className="w-3 h-3 text-slate-300" /></span>
                                             </span>
                                             <span className="text-slate-900 font-medium">{formatDate(project.installation_date)}</span>
                                         </div>
