@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Trash2Icon, CalendarIcon } from 'lucide-react';
 import { EditTaskDialog } from '@/components/EditTaskDialog';
+import { TEAM_MEMBERS } from '@/lib/utils';
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'No deadline';
@@ -29,7 +30,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskDesc, setNewTaskDesc] = useState('');
     const [newTaskDeadline, setNewTaskDeadline] = useState('');
-    const [assigneeId, setAssigneeId] = useState<string>('none');
+    const [newTaskAccountable, setNewTaskAccountable] = useState(TEAM_MEMBERS[0]);
 
     useEffect(() => {
         fetchTasksAndUsers();
@@ -65,7 +66,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                 title: newTaskTitle,
                 description: newTaskDesc,
                 deadline: newTaskDeadline || null,
-                assigned_to: assigneeId === 'none' ? null : assigneeId,
+                accountable_name: newTaskAccountable,
                 status: 'Pending'
             }
         ]);
@@ -77,7 +78,6 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
             setNewTaskTitle('');
             setNewTaskDesc('');
             setNewTaskDeadline('');
-            setAssigneeId('none');
             setIsDialogOpen(false);
             fetchTasksAndUsers();
         }
@@ -132,16 +132,13 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label>Accountable</Label>
-                                    <Select value={assigneeId} onValueChange={setAssigneeId}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Assign to..." />
+                                    <Select value={newTaskAccountable} onValueChange={setNewTaskAccountable}>
+                                        <SelectTrigger className="w-full"> {/* ADDED w-full */}
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">Unassigned</SelectItem>
-                                            {users.map(u => (
-                                                <SelectItem key={u.id} value={u.id}>
-                                                    {u.full_name || 'Unknown'}
-                                                </SelectItem>
+                                            {TEAM_MEMBERS.map(member => (
+                                                <SelectItem key={member} value={member}>{member}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -195,9 +192,9 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
                                     <div className="mt-3 flex items-center gap-1.5">
                                         <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
-                                            {task.profiles?.full_name ? task.profiles.full_name.charAt(0).toUpperCase() : 'U'}
+                                            {task.accountable_name ? task.accountable_name.charAt(0).toUpperCase() : 'U'}
                                         </span>
-                                        <span className="text-xs font-medium text-slate-700">{task.profiles?.full_name || 'Unassigned'}</span>
+                                        <span className="text-xs font-medium text-slate-700">{task.accountable_name || 'Unassigned'}</span>
                                     </div>
                                 </div>
 

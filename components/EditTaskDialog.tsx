@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PencilIcon } from 'lucide-react';
+import { TEAM_MEMBERS } from '@/lib/utils';
 
 export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, users: any[], onTaskUpdated: () => void }) {
     const [open, setOpen] = useState(false);
@@ -16,7 +17,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [assigneeId, setAssigneeId] = useState('none');
+    const [accountableName, setAccountableName] = useState(TEAM_MEMBERS[0]);
 
     // Pre-fill the form
     useEffect(() => {
@@ -24,7 +25,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
             setTitle(task.title || '');
             setDescription(task.description || '');
             setDeadline(task.deadline || '');
-            setAssigneeId(task.assigned_to || 'none');
+            setAccountableName(task.accountable_name || TEAM_MEMBERS[0]);
         }
     }, [task, open]);
 
@@ -38,7 +39,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
                 title,
                 description,
                 deadline: deadline || null,
-                assigned_to: assigneeId === 'none' ? null : assigneeId
+                accountable_name: accountableName
             })
             .eq('id', task.id);
 
@@ -83,12 +84,11 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label>Accountable</Label>
-                            <Select value={assigneeId} onValueChange={setAssigneeId}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
+                            <Select value={accountableName} onValueChange={setAccountableName}>
+                                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none">Unassigned</SelectItem>
-                                    {users.map(u => (
-                                        <SelectItem key={u.id} value={u.id}>{u.full_name || 'Unknown'}</SelectItem>
+                                    {TEAM_MEMBERS.map(member => (
+                                        <SelectItem key={member} value={member}>{member}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
