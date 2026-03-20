@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { TaskList } from '@/components/TaskList';
-import { Trash2Icon } from 'lucide-react';
+import { Trash2Icon, LockIcon } from 'lucide-react';
 import { EditProjectDialog } from '@/components/EditProjectDialog'; // <-- Import the new dialog
 import { ProjectFiles } from '@/components/ProjectFiles';
 
@@ -162,9 +162,34 @@ export default function ProjectDetailsPage() {
                                     <span className="text-slate-900 font-medium">{formatDate(project.deadline)}</span>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 font-medium block">Created</span>
+                                    <span className="text-slate-500 font-medium block">Job Created</span>
                                     <span className="text-slate-900 font-medium">{formatDate(project.created_at)}</span>
                                 </div>
+
+                                {/* NEW: SECURE ADMIN FIELDS */}
+                                {isAdmin && (
+                                    <>
+                                        <div className="pt-2 mt-2 border-t border-slate-100">
+                                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                                                Deposit Received <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                            </span>
+                                            <span className="text-slate-900 font-medium">{formatDate(project.deposit_received_at)}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                                                Drawings Received <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                            </span>
+                                            <span className="text-slate-900 font-medium">{formatDate(project.drawings_received_at)}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                                                Install / Delivery <LockIcon className="w-3 h-3 text-slate-300" title="Admin Only" />
+                                            </span>
+                                            <span className="text-slate-900 font-medium">{formatDate(project.installation_date)}</span>
+                                        </div>
+                                    </>
+                                )}
+
                                 {/* Gauteng Delivery Indicator */}
                                 <div>
                                     <span className="text-slate-500 font-medium block">Delivery Location</span>
