@@ -31,6 +31,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
     const [newTaskDesc, setNewTaskDesc] = useState('');
     const [newTaskDeadline, setNewTaskDeadline] = useState('');
     const [newTaskAccountable, setNewTaskAccountable] = useState(TEAM_MEMBERS[0]);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         fetchTasksAndUsers();
@@ -38,6 +39,10 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
     const fetchTasksAndUsers = async () => {
         setLoading(true);
+
+        // Grab current user for the audit trail
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
 
         const { data: tasksData } = await supabase
             .from('tasks')
@@ -84,11 +89,28 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
     };
 
     const handleStatusChange = async (taskId: string, newStatus: string) => {
-        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+        const isDone = newStatus === 'Done';
+        const completedAt = isDone ? new Date().toISOString() : null;
+
+        // Find the current user's profile to get their name
+        const currentProfile = users.find(u => u.id === currentUser?.id);
+        const completedByName = isDone ? (currentProfile?.full_name || 'System User') : null;
+
+        // Optimistic UI update
+        setTasks(prev => prev.map(t => t.id === taskId ? {
+            ...t,
+            status: newStatus,
+            completed_at: completedAt,
+            completed_by_name: completedByName
+        } : t));
 
         const { error } = await supabase
             .from('tasks')
-            .update({ status: newStatus })
+            .update({
+                status: newStatus,
+                completed_at: completedAt,
+                completed_by_name: completedByName
+            })
             .eq('id', taskId);
 
         if (error) {
@@ -196,6 +218,13 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                         </span>
                                         <span className="text-xs font-medium text-slate-700">{task.accountable_name || 'Unassigned'}</span>
                                     </div>
+
+                                    {/* NEW: Audit Trail Badge */}
+                                    {isDone && task.completed_at && (
+                                        <div className="mt-3 text-[10px] text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-200 w-fit font-medium">
+                                            ✓ Completed by {task.completed_by_name} on {new Date(task.completed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Actions */}

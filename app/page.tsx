@@ -161,6 +161,15 @@ export default function Dashboard() {
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Admin Quick Actions</h3>
             <div className="flex gap-4">
 
+              <Link href="/tasks">
+                <Card className="w-64 cursor-pointer hover:bg-slate-50 transition hover:shadow-md">
+                  <CardHeader>
+                    <CardTitle className="text-base">Master Task List</CardTitle>
+                    <CardDescription>Global overview of all tasks</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+
               <Link href="/admin/users">
                 <Card className="w-64 cursor-pointer hover:bg-slate-50 transition hover:shadow-md">
                   <CardHeader>

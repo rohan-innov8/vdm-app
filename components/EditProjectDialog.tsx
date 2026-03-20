@@ -107,42 +107,31 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     <DialogTitle>Edit Job Card</DialogTitle>
                     <DialogDescription>Update the details for this project.</DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1 custom-scrollbar">
-
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-name" className="text-right">Project Name</Label>
-                        <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" required />
+                <form onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[75vh] overflow-y-auto px-2 custom-scrollbar">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="name">Project Name</Label>
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smith Kitchen Island" required />
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-designer" className="text-right">Designer</Label>
-                        <div className="col-span-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label>Designer</Label>
                             <Select value={clientSelection} onValueChange={setClientSelection}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a designer or client" />
+                                    <SelectValue placeholder="Select designer..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {TOP_CLIENTS.map(client => (
                                         <SelectItem key={client} value={client}>{client}</SelectItem>
                                     ))}
-                                    <SelectItem value="Other">Other (Type custom name)</SelectItem>
+                                    <SelectItem value="Other">Other (Custom)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                    </div>
-
-                    {clientSelection === 'Other' && (
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-customClient" className="text-right text-slate-400 text-xs">Custom Name</Label>
-                            <Input id="edit-customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} className="col-span-3" required />
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-type" className="text-right">Job Type</Label>
-                        <div className="col-span-3">
+                        <div className="space-y-1.5">
+                            <Label>Job Type</Label>
                             <Select value={jobType} onValueChange={setJobType}>
-                                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                                <SelectTrigger className="w-full"><SelectValue placeholder="Select type" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Loose Item">Loose Item</SelectItem>
                                     <SelectItem value="Big Install">Big Install</SelectItem>
@@ -152,46 +141,53 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-deadline" className="text-right">Prod. Deadline</Label>
-                        <Input id="edit-deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="col-span-3" />
-                    </div>
+                    {clientSelection === 'Other' && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="customClient" className="text-slate-400 text-xs">Custom Designer Name</Label>
+                            <Input id="customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} placeholder="Enter designer name..." required />
+                        </div>
+                    )}
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <div className="col-start-2 col-span-3 flex items-center space-x-2">
-                            <input type="checkbox" id="edit-gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
-                            <Label htmlFor="edit-gauteng" className="text-sm font-normal cursor-pointer">Delivery in Gauteng</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="deadline">Prod. Deadline</Label>
+                            <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                        </div>
+                        <div className="space-y-1.5 flex flex-col justify-end pb-2">
+                            <div className="flex items-center space-x-2">
+                                <input type="checkbox" id="gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
+                                <Label htmlFor="gauteng" className="cursor-pointer">Delivery in Gauteng</Label>
+                            </div>
                         </div>
                     </div>
 
-                    {/* NEW: Management Milestones */}
-                    <div className="grid grid-cols-4 items-center gap-4 border-t pt-4 mt-2">
-                        <Label className="col-span-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Management Milestones</Label>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="desc">Notes</Label>
+                        <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Technical details..." rows={2} />
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-install-date" className="text-right text-xs">Installation Date</Label>
-                        <Input id="edit-install-date" type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} className="col-span-3" />
+                    {/* Milestones */}
+                    <div className="pt-4 border-t mt-2">
+                        <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-3">Management Milestones</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs">Install Date</Label>
+                                <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs">Deposit Rec'd</Label>
+                                <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs">Drawings Rec'd</Label>
+                                <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} />
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-deposit-date" className="text-right text-xs">Deposit Rec'd</Label>
-                        <Input id="edit-deposit-date" type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} className="col-span-3" />
-                    </div>
-
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="edit-drawings-date" className="text-right text-xs">Drawings Rec'd</Label>
-                        <Input id="edit-drawings-date" type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} className="col-span-3" />
-                    </div>
-
-                    <div className="grid grid-cols-4 items-start gap-4 border-t pt-4 mt-2">
-                        <Label htmlFor="edit-desc" className="text-right mt-2">Notes</Label>
-                        <Textarea id="edit-desc" value={description} onChange={(e) => setDescription(e.target.value)} className="col-span-3" rows={3} />
-                    </div>
-
-                    <div className="flex justify-end mt-4 pt-4 border-t sticky bottom-0 bg-white">
-                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white cursor-pointer w-full">
-                            {loading ? 'Saving...' : 'Save Changes'}
+                    <div className="flex justify-end mt-2 pt-4 border-t sticky bottom-0 bg-white">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white w-full">
+                            {loading ? 'Saving...' : 'Save Job Card'}
                         </Button>
                     </div>
                 </form>
