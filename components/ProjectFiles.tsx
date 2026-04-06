@@ -1,27 +1,36 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/lib/supabaseClient';
+import { ProjectFile } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import {
     FileIcon, Trash2Icon, UploadCloudIcon, Loader2Icon,
-    DownloadIcon, Image as ImageIcon, FileTextIcon,
+    DownloadIcon, FileTextIcon,
     FileSpreadsheetIcon, MusicIcon
 } from 'lucide-react';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
 
 export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmin: boolean }) {
-    const [files, setFiles] = useState<any[]>([]);
+    const [files, setFiles] = useState<ProjectFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        fetchFiles();
-    }, [projectId]);
-
-    const fetchFiles = async () => {
+    const fetchFiles = useCallback(async () => {
         setLoading(true);
         const { data } = await supabase
             .from('project_files')
@@ -31,7 +40,12 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
 
         setFiles(data || []);
         setLoading(false);
-    };
+    }, [projectId]);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchFiles();
+    }, [fetchFiles]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = e.target.files;
@@ -41,7 +55,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
         const validFiles = [];
         for (const file of Array.from(selectedFiles)) {
             if (file.size > MAX_FILE_SIZE) {
-                alert(`File "${file.name}" exceeds the 50MB limit and will be skipped.`);
+                toast.error(`File "${file.name}" exceeds the 50MB limit and will be skipped.`);
                 continue;
             }
             validFiles.push(file);
@@ -70,7 +84,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                 .upload(filePath, file);
 
             if (uploadError) {
-                alert(`Failed to upload ${file.name}: ` + uploadError.message);
+                toast.error(`Failed to upload ${file.name}: ` + uploadError.message);
                 continue;
             }
 
@@ -89,8 +103,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
             }]);
 
             if (dbError) {
-                console.error('DB Insert Error:', dbError);
-                alert(`Uploaded ${file.name} but failed to link it. Contact support.`);
+                toast.error(`Uploaded ${file.name} but failed to link it. Contact support.`);
             } else {
                 successCount++;
             }
@@ -104,8 +117,6 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
     };
 
     const handleDelete = async (fileId: string, fileUrl: string) => {
-        if (!window.confirm('Are you sure you want to delete this file? This cannot be undone.')) return;
-
         // Safely extract the path from the URL to delete from storage
         if (fileUrl) {
             const urlParts = fileUrl.split('/project-assets/');
@@ -116,6 +127,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
         }
 
         await supabase.from('project_files').delete().eq('id', fileId);
+        toast.success("File deleted correctly");
         fetchFiles();
     };
 
@@ -215,18 +227,30 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                                             </a>
 
                                             {isAdmin && (
-                                                <Button
-                                                    size="icon"
-                                                    variant="destructive"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleDelete(file.id, file.file_url);
-                                                    }}
-                                                    className="h-10 w-10 sm:h-8 sm:w-8 rounded-full cursor-pointer shadow-md"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2Icon className="h-4 w-4" />
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="destructive"
+                                                            className="h-10 w-10 sm:h-8 sm:w-8 rounded-full cursor-pointer shadow-md"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2Icon className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete file?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete this file? This cannot be undone.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDelete(file.id, file.file_url)} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             )}
                                         </div>
                                     </div>

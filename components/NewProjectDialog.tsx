@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -51,7 +52,7 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
         setLoading(false);
 
         if (error) {
-            alert('Error creating project: ' + error.message);
+            toast.error('Error creating project: ' + error.message);
         } else {
             setOpen(false);
             setName('');
@@ -158,12 +159,12 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                                 <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-xs">Deposit Rec'd</Label>
+                                <Label className="text-xs">Deposit Rec&apos;d</Label>
                                 {/* h-12 on mobile */}
                                 <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-xs">Drawings Rec'd</Label>
+                                <Label className="text-xs">Drawings Rec&apos;d</Label>
                                 {/* h-12 on mobile */}
                                 <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>

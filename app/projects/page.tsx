@@ -1,5 +1,17 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/lib/supabaseClient';
 import { NewProjectDialog } from '@/components/NewProjectDialog';
 import { KanbanBoard } from '@/components/KanbanBoard';
@@ -20,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
 import { Trash2Icon, PencilIcon } from 'lucide-react';
 import { EditProjectDialog } from '@/components/EditProjectDialog';
+import { Project } from '@/lib/types';
 
 
 const getStatusColor = (status: string) => {
@@ -44,7 +57,7 @@ const formatDate = (dateString: string | null) => {
 };
 
 export default function ProjectsPage() {
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const router = useRouter();
@@ -56,6 +69,7 @@ export default function ProjectsPage() {
 
     useEffect(() => {
         const savedView = localStorage.getItem('vdm-view-preference');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (savedView) setActiveTab(savedView);
         setIsMounted(true);
     }, []);
@@ -65,7 +79,7 @@ export default function ProjectsPage() {
         localStorage.setItem('vdm-view-preference', value);
     };
 
-    const fetchProjects = async () => {
+    const fetchProjects = useCallback(async () => {
         if (projects.length === 0) setLoading(true);
 
         const { data: { user } } = await supabase.auth.getUser();
@@ -82,11 +96,12 @@ export default function ProjectsPage() {
         else setProjects(data || []);
 
         setLoading(false);
-    };
+    }, [projects.length]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchProjects();
-    }, []);
+    }, [fetchProjects]);
 
     const handleMoveProject = async (projectId: string, newStatus: string) => {
         const previousProjects = [...projects];
@@ -96,25 +111,22 @@ export default function ProjectsPage() {
 
         if (error) {
             console.error('Update failed:', error);
-            alert('Failed to move project. Reverting...');
+            toast.error('Failed to move project. Reverting...');
             setProjects(previousProjects);
         }
     };
 
-    const handleDeleteProject = async (projectId: string, e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
-        if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted.')) {
-            return;
-        }
-
+    const handleDeleteProject = async (projectId: string) => {
         const previousProjects = [...projects];
         setProjects(prev => prev.filter(p => p.id !== projectId));
 
         const { error } = await supabase.from('projects').delete().eq('id', projectId);
 
         if (error) {
-            alert('Failed to delete project: ' + error.message);
+            toast.error('Failed to delete project: ' + error.message);
             setProjects(previousProjects);
+        } else {
+            toast.success('Project deleted successfully.');
         }
     };
 
@@ -132,8 +144,8 @@ export default function ProjectsPage() {
 
         if (sortConfig) {
             processed.sort((a, b) => {
-                const aValue = a[sortConfig.key] || '';
-                const bValue = b[sortConfig.key] || '';
+                const aValue = (a[sortConfig.key as keyof Project] as string) || '';
+                const bValue = (b[sortConfig.key as keyof Project] as string) || '';
                 if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
@@ -315,15 +327,31 @@ export default function ProjectsPage() {
                                                                                 }
                                                                             />
                                                                             {/* CHANGED: opacity-100 lg:opacity-0 */}
-                                                                            <Button
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                className="h-12 w-12 sm:h-10 sm:w-10 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                                                                onClick={(e) => handleDeleteProject(project.id, e)}
-                                                                                title="Delete Project"
-                                                                            >
-                                                                                <Trash2Icon className="h-4 w-4" />
-                                                                            </Button>
+                                                                            <AlertDialog>
+                                                                                <AlertDialogTrigger asChild>
+                                                                                    <Button
+                                                                                        variant="ghost"
+                                                                                        size="icon"
+                                                                                        className="h-12 w-12 sm:h-10 sm:w-10 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                        title="Delete Project"
+                                                                                    >
+                                                                                        <Trash2Icon className="h-4 w-4" />
+                                                                                    </Button>
+                                                                                </AlertDialogTrigger>
+                                                                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                                                                    <AlertDialogHeader>
+                                                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                                                        <AlertDialogDescription>
+                                                                                            This will permanently delete this project. All tasks and files associated with it will also be deleted.
+                                                                                        </AlertDialogDescription>
+                                                                                    </AlertDialogHeader>
+                                                                                    <AlertDialogFooter>
+                                                                                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                                                                                        <AlertDialogAction onClick={(e) => { e.stopPropagation(); handleDeleteProject(project.id); }} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+                                                                                    </AlertDialogFooter>
+                                                                                </AlertDialogContent>
+                                                                            </AlertDialog>
                                                                         </>
                                                                     )}
                                                                 </div>

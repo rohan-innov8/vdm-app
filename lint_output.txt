@@ -1,0 +1,228 @@
+
+> vdm-app@0.1.0 lint
+> eslint
+
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/actions/deleteUser.ts
+  25:13  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/admin/tasks/page.tsx
+  24:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/admin/users/page.tsx
+   8:10  warning  'Badge' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  28:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  51:23  warning  'error' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  57:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/admin/users/page.tsx:57:9
+  55 |
+  56 |     useEffect(() => {
+> 57 |         fetchUsers();
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  58 |     }, [router]);
+  59 |
+  60 |     const handleRoleChange = async (userId: string, newRole: string) => {  react-hooks/set-state-in-effect
+  58:8   warning  React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+  88:63  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  90:23  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/login/page.tsx
+  90:24  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/page.tsx
+  12:10  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  12:36  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  13:42  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/projects/[id]/page.tsx
+  40:44  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  68:24  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/projects/[id]/page.tsx:68:24
+  66 |
+  67 |     useEffect(() => {
+> 68 |         if (projectId) fetchProjectDetails();
+     |                        ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  69 |     }, [projectId, fetchProjectDetails]);
+  70 |
+  71 |     const handleDeleteProject = async () => {  react-hooks/set-state-in-effect
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/projects/page.tsx
+  47:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  59:24  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/projects/page.tsx:59:24
+  57 |     useEffect(() => {
+  58 |         const savedView = localStorage.getItem('vdm-view-preference');
+> 59 |         if (savedView) setActiveTab(savedView);
+     |                        ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  60 |         setIsMounted(true);
+  61 |     }, []);
+  62 |  react-hooks/set-state-in-effect
+  88:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/app/projects/page.tsx:88:9
+  86 |
+  87 |     useEffect(() => {
+> 88 |         fetchProjects();
+     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  89 |     }, []);
+  90 |
+  91 |     const handleMoveProject = async (projectId: string, newStatus: string) => {                                                           react-hooks/set-state-in-effect
+  89:8   warning  React Hook useEffect has a missing dependency: 'fetchProjects'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/EditProjectDialog.tsx
+   14:92  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   33:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/EditProjectDialog.tsx:33:13
+  31 |     useEffect(() => {
+  32 |         if (project && open) {
+> 33 |             setName(project.name || '');
+     |             ^^^^^^^ Avoid calling setState() directly within an effect
+  34 |             setDescription(project.description || '');
+  35 |             setJobType(project.job_type || 'Loose Item');
+  36 |             setDeadline(project.deadline || '');  react-hooks/set-state-in-effect
+  178:71  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react/no-unescaped-entities
+  182:72  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react/no-unescaped-entities
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/EditTaskDialog.tsx
+  13:40  warning  'users' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  13:72  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  13:84  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  25:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/EditTaskDialog.tsx:25:13
+  23 |     useEffect(() => {
+  24 |         if (task && open) {
+> 25 |             setTitle(task.title || '');
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |             setDescription(task.description || '');
+  27 |             setDeadline(task.deadline || '');
+  28 |             setAccountableName(task.accountable_name || TEAM_MEMBERS[0]);  react-hooks/set-state-in-effect
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/KanbanBoard.tsx
+   3:49   warning  'DragStartEvent' is defined but never used  @typescript-eslint/no-unused-vars
+  22:103  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  28:43   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  37:82   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  41:69   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  47:80   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  57:41   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  65:98   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  78:89   error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/NewProjectDialog.tsx
+  161:71  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  166:72  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/ProjectFiles.tsx
+   7:28  warning  'ImageIcon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  14:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  21:9   error    Error: Cannot access variable before it is declared
+
+`fetchFiles` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/ProjectFiles.tsx:21:9
+  19 |
+  20 |     useEffect(() => {
+> 21 |         fetchFiles();
+     |         ^^^^^^^^^^ `fetchFiles` accessed before it is declared
+  22 |     }, [projectId]);
+  23 |
+  24 |     const fetchFiles = async () => {
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/ProjectFiles.tsx:24:5
+  22 |     }, [projectId]);
+  23 |
+> 24 |     const fetchFiles = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 25 |         setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 26 |         const { data } = await supabase
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |         setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     };
+     | ^^^^^^^ `fetchFiles` is declared here
+  35 |
+  36 |     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  37 |         const selectedFiles = e.target.files;  react-hooks/immutability
+  22:8   warning  React Hook useEffect has a missing dependency: 'fetchFiles'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/TaskList.tsx
+  24:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  25:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  34:52  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  37:9   error    Error: Cannot access variable before it is declared
+
+`fetchTasksAndUsers` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/TaskList.tsx:37:9
+  35 |
+  36 |     useEffect(() => {
+> 37 |         fetchTasksAndUsers();
+     |         ^^^^^^^^^^^^^^^^^^ `fetchTasksAndUsers` accessed before it is declared
+  38 |     }, [projectId]);
+  39 |
+  40 |     const fetchTasksAndUsers = async () => {
+
+/Users/rohanvisagie/Local Sites/vdm-app/components/TaskList.tsx:40:5
+  38 |     }, [projectId]);
+  39 |
+> 40 |     const fetchTasksAndUsers = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 61 |         setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^
+> 62 |     };
+     | ^^^^^^^ `fetchTasksAndUsers` is declared here
+  63 |
+  64 |     const handleAddTask = async (e: React.FormEvent) => {
+  65 |         e.preventDefault();  react-hooks/immutability
+  38:8   warning  React Hook useEffect has a missing dependency: 'fetchTasksAndUsers'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+✖ 47 problems (36 errors, 11 warnings)
+

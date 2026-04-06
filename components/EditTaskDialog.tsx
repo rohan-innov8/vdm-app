@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PencilIcon } from 'lucide-react';
 import { TEAM_MEMBERS } from '@/lib/utils';
+import { ExtendedTask } from '@/lib/types';
 
-export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, users: any[], onTaskUpdated: () => void }) {
+export function EditTaskDialog({ task, onTaskUpdated }: { task: ExtendedTask, onTaskUpdated: () => void }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -22,6 +24,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
     // Pre-fill the form
     useEffect(() => {
         if (task && open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setTitle(task.title || '');
             setDescription(task.description || '');
             setDeadline(task.deadline || '');
@@ -46,7 +49,7 @@ export function EditTaskDialog({ task, users, onTaskUpdated }: { task: any, user
         setLoading(false);
 
         if (error) {
-            alert('Failed to update task: ' + error.message);
+            toast.error('Failed to update task: ' + error.message);
         } else {
             setOpen(false);
             onTaskUpdated();

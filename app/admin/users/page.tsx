@@ -1,11 +1,24 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Profile } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import {
     Table,
     TableBody,
@@ -25,11 +38,11 @@ import { Trash2Icon } from 'lucide-react';
 import { deleteUserAccount } from '@/app/actions/deleteUser';
 
 export default function UserManagementPage() {
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             router.push('/login');
@@ -43,19 +56,20 @@ export default function UserManagementPage() {
             .single();
 
         if (profile?.role !== 'admin') {
-            alert('Unauthorized. Admins only.');
+            toast.error('Unauthorized. Admins only.');
             router.push('/');
             return;
         }
 
-        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+        const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
         if (data) setUsers(data);
         setLoading(false);
-    };
+    }, [router]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchUsers();
-    }, [router]);
+    }, [fetchUsers]);
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         const { error } = await supabase
@@ -64,7 +78,7 @@ export default function UserManagementPage() {
             .eq('id', userId);
 
         if (error) {
-            alert('Failed to update role');
+            toast.error('Failed to update role');
         } else {
             setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
         }
@@ -72,23 +86,20 @@ export default function UserManagementPage() {
 
     const handleDeleteUser = async (userId: string, userRole: string) => {
         if (userRole === 'admin') {
-            alert("Safety lock: You cannot delete another admin from the dashboard.");
+            toast.error("Safety lock: You cannot delete another admin from the dashboard.");
             return;
         }
-
-        const confirmDelete = window.confirm("Are you SURE you want to delete this user? They will lose all access immediately.");
-        if (!confirmDelete) return;
 
         try {
             const result = await deleteUserAccount(userId);
             if (result.success) {
-                alert("User deleted successfully.");
+                toast.success("User deleted successfully.");
                 setUsers(users.filter(u => u.id !== userId));
             } else {
-                alert("Failed to delete user: " + ((result as any).error || "Unknown error"));
+                toast.error("Failed to delete user: " + ((result as { error?: string }).error || "Unknown error"));
             }
-        } catch (err: any) {
-            alert("Error: " + err.message);
+        } catch (err: unknown) {
+            toast.error("Error: " + (err as Error).message);
         }
     };
 
@@ -157,16 +168,30 @@ export default function UserManagementPage() {
                                                 </Select>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    // Ensure the delete button is easily tappable on phones
-                                                    className="h-12 w-12 sm:h-10 sm:w-10 text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                                                    onClick={() => handleDeleteUser(u.id, u.role)}
-                                                    title="Delete User"
-                                                >
-                                                    <Trash2Icon className="h-4 w-4" />
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-12 w-12 sm:h-10 sm:w-10 text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                                                            title="Delete User"
+                                                        >
+                                                            <Trash2Icon className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                This will permanently delete this user. They will lose all access immediately.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDeleteUser(u.id, u.role)} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </TableCell>
                                         </TableRow>
                                     ))}

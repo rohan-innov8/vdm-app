@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,13 +9,11 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
     const router = useRouter();
 
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setErrorMsg('');
 
         const { error } = await supabase.auth.signInWithPassword({
             email,
@@ -22,7 +21,7 @@ export default function LoginPage() {
         });
 
         if (error) {
-            setErrorMsg(error.message);
+            toast.error(error.message);
             setLoading(false);
         } else {
             router.push('/');
@@ -78,16 +77,9 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                {errorMsg && (
-                    // mt-4 (16px)
-                    <p className="mt-4 text-center text-sm text-red-600">
-                        {errorMsg}
-                    </p>
-                )}
-
                 {/* mt-6 (24px) */}
                 <div className="mt-6 text-center text-sm text-gray-600">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Link href="/register" className="text-indigo-600 hover:underline font-medium">
                         Create one
                     </Link>

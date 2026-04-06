@@ -22,7 +22,7 @@ export async function deleteUserAccount(userId: string) {
 
     // 3. Delete the user from the Supabase Auth system
     // (If your database is set up with 'ON DELETE CASCADE', this will automatically wipe their profile too)
-    const { data, error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
         throw new Error(error.message);

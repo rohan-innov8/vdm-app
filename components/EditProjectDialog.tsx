@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,10 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EditIcon } from 'lucide-react';
+import { Project } from '@/lib/types';
 
 const TOP_CLIENTS = ['Design House A', 'Interiors B', 'Architects C', 'Studio D'];
 
-export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: { project: any, onProjectUpdated: () => void, customTrigger?: React.ReactNode }) {
+export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: { project: Project, onProjectUpdated: () => void, customTrigger?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -30,6 +32,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
 
     useEffect(() => {
         if (project && open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName(project.name || '');
             setDescription(project.description || '');
             setJobType(project.job_type || 'Loose Item');
@@ -41,7 +44,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
             setDepositReceived(project.deposit_received_at ? project.deposit_received_at.split('T')[0] : '');
             setDrawingsReceived(project.drawings_received_at ? project.drawings_received_at.split('T')[0] : '');
 
-            if (TOP_CLIENTS.includes(project.client_name)) {
+            if (project.client_name && TOP_CLIENTS.includes(project.client_name)) {
                 setClientSelection(project.client_name);
                 setCustomClient('');
             } else if (project.client_name) {
@@ -78,7 +81,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
         setLoading(false);
 
         if (error) {
-            alert('Error updating project: ' + error.message);
+            toast.error('Error updating project: ' + error.message);
         } else {
             setOpen(false);
             onProjectUpdated();
@@ -175,11 +178,11 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                                 <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-xs">Deposit Rec'd</Label>
+                                <Label className="text-xs">Deposit Rec&apos;d</Label>
                                 <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-xs">Drawings Rec'd</Label>
+                                <Label className="text-xs">Drawings Rec&apos;d</Label>
                                 <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                         </div>

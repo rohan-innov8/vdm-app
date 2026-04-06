@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useDraggable, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core';
 import { Trash2Icon, PencilIcon, CalendarIcon } from 'lucide-react';
 import Link from 'next/link';
 import { EditProjectDialog } from '@/components/EditProjectDialog';
+import { Project } from '@/lib/types';
 
 const COLUMNS = [
     { id: 'Pre-Production', title: 'Pre-Production', color: 'border-l-slate-300' },
@@ -19,14 +20,22 @@ const formatDate = (dateString: string | null) => {
     return new Date(dateString).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-export function KanbanBoard({ projects, onProjectMoved, isAdmin, onDeleteProject, onProjectUpdated }: any) {
+interface KanbanBoardProps {
+    projects: Project[];
+    onProjectMoved: (id: string, status: string) => void;
+    isAdmin: boolean;
+    onDeleteProject: (id: string) => void;
+    onProjectUpdated: () => void;
+}
+
+export function KanbanBoard({ projects, onProjectMoved, isAdmin, onDeleteProject, onProjectUpdated }: KanbanBoardProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over) return;
-        const project = projects.find((p: any) => p.id === active.id);
-        if (project && project.status !== over.id) onProjectMoved(active.id, over.id as string);
+        const project = projects.find((p: Project) => p.id === active.id);
+        if (project && project.status !== over.id) onProjectMoved(active.id as string, over.id as string);
         setActiveId(null);
     };
 
@@ -34,17 +43,25 @@ export function KanbanBoard({ projects, onProjectMoved, isAdmin, onDeleteProject
         <DndContext onDragStart={(e) => setActiveId(e.active.id as string)} onDragEnd={handleDragEnd}>
             <div className="flex gap-4 md:gap-6 h-full min-h-[500px] overflow-x-auto pb-4 snap-x px-1 custom-scrollbar">
                 {COLUMNS.map((col) => (
-                    <Column key={col.id} col={col} projects={projects.filter((p: any) => p.status === col.id)} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} />
+                    <Column key={col.id} col={col} projects={projects.filter((p: Project) => p.status === col.id)} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} />
                 ))}
             </div>
             <DragOverlay>
-                {activeId ? <ProjectCard project={projects.find((p: any) => p.id === activeId)} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} colColor="border-l-slate-400" /> : null}
+                {activeId ? <ProjectCard project={projects.find((p: Project) => p.id === activeId)} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} colColor="border-l-slate-400" /> : null}
             </DragOverlay>
         </DndContext>
     );
 }
 
-function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: any) {
+interface ColumnProps {
+    col: { id: string; title: string; color: string };
+    projects: Project[];
+    isAdmin: boolean;
+    onDeleteProject: (id: string) => void;
+    onProjectUpdated: () => void;
+}
+
+function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: ColumnProps) {
     const { setNodeRef, isOver } = useDroppable({ id: col.id });
     return (
         // Fluid width on mobile (85vw), fixed width on desktop (320px)
@@ -54,7 +71,7 @@ function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: a
                 <span className="bg-white px-2 py-0.5 rounded-md text-xs font-bold text-slate-500 shadow-sm border border-slate-100">{projects.length}</span>
             </h3>
             <div className="flex flex-col gap-3 min-h-[200px]">
-                {projects.map((project: any) => (
+                {projects.map((project: Project) => (
                     <DraggableProjectCard key={project.id} project={project} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} colColor={col.color} />
                 ))}
             </div>
@@ -62,7 +79,15 @@ function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: a
     );
 }
 
-function DraggableProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colColor }: any) {
+interface DraggableCardProps {
+    project: Project;
+    isAdmin: boolean;
+    onDeleteProject: (id: string) => void;
+    onProjectUpdated: () => void;
+    colColor: string;
+}
+
+function DraggableProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colColor }: DraggableCardProps) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: project.id });
     const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
 
@@ -75,7 +100,15 @@ function DraggableProjectCard({ project, isAdmin, onDeleteProject, onProjectUpda
     );
 }
 
-function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colColor }: any) {
+interface ProjectCardProps {
+    project?: Project;
+    isAdmin?: boolean;
+    onDeleteProject?: (id: string) => void;
+    onProjectUpdated?: () => void;
+    colColor: string;
+}
+
+function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colColor }: ProjectCardProps) {
     if (!project) return null;
     return (
         <div className={`bg-white p-4 rounded-lg shadow-sm border-y border-r border-slate-200 relative group border-l-4 ${colColor} hover:shadow-md transition-all`}>
@@ -87,12 +120,12 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colC
                 </h4>
                 {isAdmin && (
                     <div className="flex items-center gap-1.5 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-2">
-                        <EditProjectDialog project={project} onProjectUpdated={onProjectUpdated} customTrigger={
+                        <EditProjectDialog project={project} onProjectUpdated={onProjectUpdated as () => void} customTrigger={
                             // Enhanced touch target for mobile (h-8 w-8)
                             <button className="text-slate-400 hover:text-indigo-600 h-8 w-8 flex items-center justify-center rounded-md hover:bg-slate-50" onPointerDown={(e) => e.stopPropagation()}><PencilIcon className="h-3.5 w-3.5" /></button>
                         } />
                         {/* Enhanced touch target for mobile (h-8 w-8) */}
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteProject(project.id); }} className="text-red-400 hover:text-red-600 h-8 w-8 flex items-center justify-center rounded-md hover:bg-red-50" onPointerDown={(e) => e.stopPropagation()}><Trash2Icon className="h-3.5 w-3.5" /></button>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onDeleteProject) onDeleteProject(project.id); }} className="text-red-400 hover:text-red-600 h-8 w-8 flex items-center justify-center rounded-md hover:bg-red-50" onPointerDown={(e) => e.stopPropagation()}><Trash2Icon className="h-3.5 w-3.5" /></button>
                     </div>
                 )}
             </div>

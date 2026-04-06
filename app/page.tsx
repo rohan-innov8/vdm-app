@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Profile } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -9,8 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   // Dashboard Stats State
   const [projectCount, setProjectCount] = useState(0);
@@ -28,7 +28,7 @@ export default function Dashboard() {
         router.push('/login');
         return;
       }
-      setUser(user);
+
 
       const { data: profileData } = await supabase
         .from('profiles')

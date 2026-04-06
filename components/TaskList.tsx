@@ -1,6 +1,20 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/lib/supabaseClient';
+import { ExtendedTask, Profile } from '@/lib/types';
+import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,7 +25,7 @@ import { Trash2Icon, CalendarIcon } from 'lucide-react';
 import { EditTaskDialog } from '@/components/EditTaskDialog';
 import { TEAM_MEMBERS } from '@/lib/utils';
 
-const formatDate = (dateString: string | null) => {
+const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'No deadline';
     return new Date(dateString).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -21,8 +35,8 @@ const formatDate = (dateString: string | null) => {
 };
 
 export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: boolean }) {
-    const [tasks, setTasks] = useState<any[]>([]);
-    const [users, setUsers] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<ExtendedTask[]>([]);
+    const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Dialog & Form State
@@ -31,13 +45,9 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
     const [newTaskDesc, setNewTaskDesc] = useState('');
     const [newTaskDeadline, setNewTaskDeadline] = useState('');
     const [newTaskAccountable, setNewTaskAccountable] = useState(TEAM_MEMBERS[0]);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        fetchTasksAndUsers();
-    }, [projectId]);
-
-    const fetchTasksAndUsers = async () => {
+    const fetchTasksAndUsers = useCallback(async () => {
         setLoading(true);
 
         // Grab current user for the audit trail
@@ -54,12 +64,17 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
         const { data: usersData } = await supabase
             .from('profiles')
-            .select('id, full_name, role')
+            .select('id, full_name, role, created_at')
             .order('full_name', { ascending: true });
 
         setUsers(usersData || []);
         setLoading(false);
-    };
+    }, [projectId]);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchTasksAndUsers();
+    }, [fetchTasksAndUsers]);
 
     const handleAddTask = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -77,7 +92,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
         ]);
 
         if (error) {
-            alert('Failed to add task: ' + error.message);
+            toast.error('Failed to add task: ' + error.message);
         } else {
             // Reset form and close dialog
             setNewTaskTitle('');
@@ -114,15 +129,14 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
             .eq('id', taskId);
 
         if (error) {
-            alert('Failed to update status');
+            toast.error('Failed to update status');
             fetchTasksAndUsers();
         }
     };
 
     const handleDeleteTask = async (taskId: string) => {
-        if (!window.confirm('Are you sure you want to delete this task?')) return;
         const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-        if (error) alert('Failed to delete task: ' + error.message);
+        if (error) toast.error('Failed to delete task: ' + error.message);
         else fetchTasksAndUsers();
     };
 
@@ -247,16 +261,31 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
                                     {isAdmin && (
                                         <div className="flex items-center gap-1">
-                                            <EditTaskDialog task={task} users={users} onTaskUpdated={fetchTasksAndUsers} />
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleDeleteTask(task.id)}
-                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-12 w-12 sm:h-8 sm:w-8 cursor-pointer"
-                                                title="Delete Task"
-                                            >
-                                                <Trash2Icon className="h-4 w-4" />
-                                            </Button>
+                                            <EditTaskDialog task={task} onTaskUpdated={fetchTasksAndUsers} />
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-12 w-12 sm:h-8 sm:w-8 cursor-pointer"
+                                                        title="Delete Task"
+                                                    >
+                                                        <Trash2Icon className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete task?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to delete this task? This cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteTask(task.id)} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     )}
                                 </div>

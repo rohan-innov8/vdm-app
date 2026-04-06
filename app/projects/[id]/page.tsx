@@ -1,5 +1,17 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
@@ -10,6 +22,7 @@ import { TaskList } from '@/components/TaskList';
 import { Trash2Icon, LockIcon } from 'lucide-react';
 import { EditProjectDialog } from '@/components/EditProjectDialog';
 import { ProjectFiles } from '@/components/ProjectFiles';
+import { Project } from '@/lib/types';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -23,7 +36,7 @@ const getStatusColor = (status: string) => {
     }
 };
 
-const formatDate = (dateString: string | null) => {
+const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'None set';
     return new Date(dateString).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -37,7 +50,7 @@ export default function ProjectDetailsPage() {
     const router = useRouter();
     const projectId = params.id as string;
 
-    const [project, setProject] = useState<any>(null);
+    const [project, setProject] = useState<Project | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -56,7 +69,7 @@ export default function ProjectDetailsPage() {
 
         if (error) {
             console.error('Error fetching project:', error);
-            alert('Project not found.');
+            toast.error('Project not found.');
             router.push('/projects');
         } else {
             setProject(data);
@@ -65,19 +78,17 @@ export default function ProjectDetailsPage() {
     }, [projectId, router]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (projectId) fetchProjectDetails();
     }, [projectId, fetchProjectDetails]);
 
     const handleDeleteProject = async () => {
-        if (!window.confirm('Are you ABSOLUTELY sure you want to delete this project? All tasks associated with it will also be deleted. This cannot be undone.')) {
-            return;
-        }
-
         const { error } = await supabase.from('projects').delete().eq('id', projectId);
 
         if (error) {
-            alert('Failed to delete project: ' + error.message);
+            toast.error('Failed to delete project: ' + error.message);
         } else {
+            toast.success('Project deleted successfully.');
             router.push('/projects');
         }
     };
@@ -107,14 +118,29 @@ export default function ProjectDetailsPage() {
                                 <EditProjectDialog project={project} onProjectUpdated={fetchProjectDetails} />
                             </div>
 
-                            <Button
-                                variant="destructive"
-                                onClick={handleDeleteProject}
-                                className="w-full sm:w-auto h-12 sm:h-10 bg-red-500 hover:bg-red-600 text-white cursor-pointer"
-                            >
-                                <Trash2Icon className="w-4 h-4 mr-2" />
-                                Delete Project
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        variant="destructive"
+                                        className="w-full sm:w-auto h-12 sm:h-10 bg-red-500 hover:bg-red-600 text-white cursor-pointer"
+                                    >
+                                        <Trash2Icon className="w-4 h-4 mr-2" />
+                                        Delete Project
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently delete this project. All tasks, files, and progress associated with it will be immediately lost. This cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDeleteProject} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     )}
                 </div>

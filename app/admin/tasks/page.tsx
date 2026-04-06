@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { ExtendedTask } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -21,7 +23,7 @@ const getStageColor = (stage: string) => {
 };
 
 export default function GlobalTasksPage() {
-    const [tasks, setTasks] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<(ExtendedTask & { projects?: { name: string; status: string } })[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -34,8 +36,8 @@ export default function GlobalTasksPage() {
             }
 
             const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-            if (profile?.role !== 'admin') {
-                alert('Unauthorized. Top management only.');
+            if (profile?.role !== 'admin' && profile?.role !== 'manager') {
+                toast.error('Unauthorized. Top management only.');
                 router.push('/');
                 return;
             }
@@ -62,7 +64,7 @@ export default function GlobalTasksPage() {
         'Completed': tasks.filter(t => t.projects?.status === 'Completed')
     };
 
-    const formatDate = (dateStr: string) => dateStr ? new Date(dateStr).toLocaleDateString('en-GB') : 'No deadline';
+    const formatDate = (dateStr: string | null | undefined) => dateStr ? new Date(dateStr).toLocaleDateString('en-GB') : 'No deadline';
 
     return (
         <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
@@ -121,7 +123,7 @@ export default function GlobalTasksPage() {
                                                     </TableCell>
                                                     <TableCell>{task.title}</TableCell>
                                                     <TableCell>{task.accountable_name || 'Unassigned'}</TableCell>
-                                                    <TableCell className={new Date(task.deadline) < new Date() && task.status !== 'Done' ? 'text-red-600 font-medium' : ''}>
+                                                    <TableCell className={task.deadline && new Date(task.deadline) < new Date() && task.status !== 'Done' ? 'text-red-600 font-medium' : ''}>
                                                         {formatDate(task.deadline)}
                                                     </TableCell>
                                                     <TableCell>
