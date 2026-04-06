@@ -74,44 +74,47 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white cursor-pointer shadow-sm">+ New Project</Button>
+                {/* h-12 on mobile for touch target */}
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white cursor-pointer shadow-sm h-12 sm:h-10">+ New Project</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] p-4">
                 <DialogHeader>
                     <DialogTitle>New Job Card</DialogTitle>
                     <DialogDescription>Create a new project. You can add tasks, drawings, and files in the workspace immediately after creation.</DialogDescription>
                 </DialogHeader>
 
-                {/* Added max-height and scrolling so the taller form doesn't clip on small screens */}
-                <form onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[75vh] overflow-y-auto px-2 custom-scrollbar">
+                <form onSubmit={handleSubmit} className="grid gap-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <div className="space-y-1.5">
                         <Label htmlFor="name">Project Name</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smith Kitchen Island" required />
+                        {/* h-12 on mobile */}
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smith Kitchen Island" required className="h-12 sm:h-10" />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label>Designer</Label>
                             <Select value={clientSelection} onValueChange={setClientSelection}>
-                                <SelectTrigger className="w-full">
+                                {/* h-12 on mobile */}
+                                <SelectTrigger className="w-full h-12 sm:h-10">
                                     <SelectValue placeholder="Select designer..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {TOP_CLIENTS.map(client => (
-                                        <SelectItem key={client} value={client}>{client}</SelectItem>
+                                        <SelectItem key={client} value={client} className="py-3 sm:py-1.5">{client}</SelectItem>
                                     ))}
-                                    <SelectItem value="Other">Other (Custom)</SelectItem>
+                                    <SelectItem value="Other" className="py-3 sm:py-1.5">Other (Custom)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
                             <Label>Job Type</Label>
                             <Select value={jobType} onValueChange={setJobType}>
-                                <SelectTrigger className="w-full"><SelectValue placeholder="Select type" /></SelectTrigger>
+                                {/* h-12 on mobile */}
+                                <SelectTrigger className="w-full h-12 sm:h-10"><SelectValue placeholder="Select type" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Loose Item">Loose Item</SelectItem>
-                                    <SelectItem value="Big Install">Big Install</SelectItem>
-                                    <SelectItem value="Small Install">Small Install</SelectItem>
+                                    <SelectItem value="Loose Item" className="py-3 sm:py-1.5">Loose Item</SelectItem>
+                                    <SelectItem value="Big Install" className="py-3 sm:py-1.5">Big Install</SelectItem>
+                                    <SelectItem value="Small Install" className="py-3 sm:py-1.5">Small Install</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -120,19 +123,22 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                     {clientSelection === 'Other' && (
                         <div className="space-y-1.5">
                             <Label htmlFor="customClient" className="text-slate-400 text-xs">Custom Designer Name</Label>
-                            <Input id="customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} placeholder="Enter designer name..." required />
+                            {/* h-12 on mobile */}
+                            <Input id="customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} placeholder="Enter designer name..." required className="h-12 sm:h-10" />
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label htmlFor="deadline">Prod. Deadline</Label>
-                            <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                            {/* h-12 on mobile */}
+                            <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="h-12 sm:h-10" />
                         </div>
-                        <div className="space-y-1.5 flex flex-col justify-end pb-2">
+                        {/* Adjusted padding on mobile to align with the taller inputs */}
+                        <div className="space-y-1.5 flex flex-col justify-center sm:justify-end pb-0 sm:pb-2 min-h-[48px] sm:min-h-0">
                             <div className="flex items-center space-x-2">
-                                <input type="checkbox" id="gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
-                                <Label htmlFor="gauteng" className="cursor-pointer">Delivery in Gauteng</Label>
+                                <input type="checkbox" id="gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-5 h-5 sm:w-4 sm:h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
+                                <Label htmlFor="gauteng" className="cursor-pointer text-base sm:text-sm">Delivery in Gauteng</Label>
                             </div>
                         </div>
                     </div>
@@ -148,21 +154,24 @@ export function NewProjectDialog({ onProjectCreated }: { onProjectCreated?: () =
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Install Date</Label>
-                                <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} />
+                                {/* h-12 on mobile */}
+                                <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Deposit Rec'd</Label>
-                                <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} />
+                                {/* h-12 on mobile */}
+                                <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Drawings Rec'd</Label>
-                                <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} />
+                                {/* h-12 on mobile */}
+                                <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end mt-2 pt-4 border-t sticky bottom-0 bg-white">
-                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white w-full">
+                    <div className="flex justify-end pt-2">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white w-full h-12 sm:h-10">
                             {loading ? 'Saving...' : 'Save Job Card'}
                         </Button>
                     </div>

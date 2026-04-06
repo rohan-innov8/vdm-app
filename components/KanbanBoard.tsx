@@ -32,7 +32,6 @@ export function KanbanBoard({ projects, onProjectMoved, isAdmin, onDeleteProject
 
     return (
         <DndContext onDragStart={(e) => setActiveId(e.active.id as string)} onDragEnd={handleDragEnd}>
-            {/* NEW: Horizontal Scroll Layout */}
             <div className="flex gap-4 md:gap-6 h-full min-h-[500px] overflow-x-auto pb-4 snap-x px-1 custom-scrollbar">
                 {COLUMNS.map((col) => (
                     <Column key={col.id} col={col} projects={projects.filter((p: any) => p.status === col.id)} isAdmin={isAdmin} onDeleteProject={onDeleteProject} onProjectUpdated={onProjectUpdated} />
@@ -48,7 +47,8 @@ export function KanbanBoard({ projects, onProjectMoved, isAdmin, onDeleteProject
 function Column({ col, projects, isAdmin, onDeleteProject, onProjectUpdated }: any) {
     const { setNodeRef, isOver } = useDroppable({ id: col.id });
     return (
-        <div ref={setNodeRef} className={`w-[320px] shrink-0 p-4 rounded-xl border transition-colors duration-200 flex flex-col gap-4 snap-center ${isOver ? 'bg-slate-200 border-slate-300' : 'bg-slate-100/50 border-slate-200'}`}>
+        // Fluid width on mobile (85vw), fixed width on desktop (320px)
+        <div ref={setNodeRef} className={`w-[85vw] sm:w-[320px] shrink-0 p-4 rounded-xl border transition-colors duration-200 flex flex-col gap-4 snap-center ${isOver ? 'bg-slate-200 border-slate-300' : 'bg-slate-100/50 border-slate-200'}`}>
             <h3 className="font-bold text-slate-700 flex justify-between items-center">
                 {col.title}
                 <span className="bg-white px-2 py-0.5 rounded-md text-xs font-bold text-slate-500 shadow-sm border border-slate-100">{projects.length}</span>
@@ -86,11 +86,13 @@ function ProjectCard({ project, isAdmin, onDeleteProject, onProjectUpdated, colC
                     </Link>
                 </h4>
                 {isAdmin && (
-                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-2">
+                    <div className="flex items-center gap-1.5 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-2">
                         <EditProjectDialog project={project} onProjectUpdated={onProjectUpdated} customTrigger={
-                            <button className="text-slate-400 hover:text-indigo-600" onPointerDown={(e) => e.stopPropagation()}><PencilIcon className="h-3.5 w-3.5" /></button>
+                            // Enhanced touch target for mobile (h-8 w-8)
+                            <button className="text-slate-400 hover:text-indigo-600 h-8 w-8 flex items-center justify-center rounded-md hover:bg-slate-50" onPointerDown={(e) => e.stopPropagation()}><PencilIcon className="h-3.5 w-3.5" /></button>
                         } />
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteProject(project.id); }} className="text-red-400 hover:text-red-600" onPointerDown={(e) => e.stopPropagation()}><Trash2Icon className="h-3.5 w-3.5" /></button>
+                        {/* Enhanced touch target for mobile (h-8 w-8) */}
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteProject(project.id); }} className="text-red-400 hover:text-red-600 h-8 w-8 flex items-center justify-center rounded-md hover:bg-red-50" onPointerDown={(e) => e.stopPropagation()}><Trash2Icon className="h-3.5 w-3.5" /></button>
                     </div>
                 )}
             </div>

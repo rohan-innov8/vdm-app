@@ -8,14 +8,17 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { TaskList } from '@/components/TaskList';
 import { Trash2Icon, LockIcon } from 'lucide-react';
-import { EditProjectDialog } from '@/components/EditProjectDialog'; // <-- Import the new dialog
+import { EditProjectDialog } from '@/components/EditProjectDialog';
 import { ProjectFiles } from '@/components/ProjectFiles';
 
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'Pre-Production': return 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200';
-        case 'Production': return 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200';
-        case 'Post-Production': return 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200';
+        case 'Production': return 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200';
+        case 'Prep / Pre-assemble': return 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-200';
+        case 'Installation': return 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200';
+        case 'Snags': return 'bg-pink-50 text-pink-700 hover:bg-pink-100 border-pink-200';
+        case 'Completed': return 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200';
         default: return 'bg-gray-100 text-gray-800';
     }
 };
@@ -38,7 +41,6 @@ export default function ProjectDetailsPage() {
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // We wrap this in useCallback so we can pass it to the Edit Dialog to trigger a refresh
     const fetchProjectDetails = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -80,31 +82,35 @@ export default function ProjectDetailsPage() {
         }
     };
 
-    if (loading) return <div className="p-8 flex items-center justify-center min-h-screen text-slate-500">Loading project workspace...</div>;
+    if (loading) return <div className="p-4 sm:p-8 flex items-center justify-center min-h-screen text-slate-500">Loading project workspace...</div>;
     if (!project) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 p-8">
-            <div className="max-w-5xl mx-auto space-y-6">
+        // Enforce p-4 (16px) on mobile, sm:p-8 (32px) on desktop
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+            {/* space-y-4 (16px) gap on mobile, max-w-7xl to match the rest of the app */}
+            <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
-                {/* Navigation and Actions */}
-                <div className="flex justify-between items-center mb-4">
-                    <Link href="/projects">
-                        <Button variant="ghost" className="text-slate-500 hover:text-slate-900 cursor-pointer">
+                {/* Navigation and Actions: Stack on mobile */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+                    <Link href="/projects" className="w-full sm:w-auto">
+                        <Button variant="ghost" className="w-full sm:w-auto h-12 sm:h-10 text-slate-500 hover:text-slate-900 cursor-pointer justify-start sm:justify-center -ml-4 sm:ml-0">
                             ← Back to Projects
                         </Button>
                     </Link>
 
                     {/* Admin Actions Group */}
                     {isAdmin && (
-                        <div className="flex gap-2">
-                            {/* NEW: Edit Project Dialog */}
-                            <EditProjectDialog project={project} onProjectUpdated={fetchProjectDetails} />
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            {/* Edit Project Dialog with forced touch target heights */}
+                            <div className="w-full sm:w-auto [&>button]:w-full [&>button]:h-12 [&>button]:sm:h-10">
+                                <EditProjectDialog project={project} onProjectUpdated={fetchProjectDetails} />
+                            </div>
 
                             <Button
                                 variant="destructive"
                                 onClick={handleDeleteProject}
-                                className="bg-red-500 hover:bg-red-600 text-white cursor-pointer"
+                                className="w-full sm:w-auto h-12 sm:h-10 bg-red-500 hover:bg-red-600 text-white cursor-pointer"
                             >
                                 <Trash2Icon className="w-4 h-4 mr-2" />
                                 Delete Project
@@ -114,40 +120,42 @@ export default function ProjectDetailsPage() {
                 </div>
 
                 {/* Project Header */}
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">{project.name}</h1>
-                        <p className="text-slate-500 mt-1">{project.description || 'No description provided.'}</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{project.name}</h1>
+                        <p className="text-slate-500 mt-1 text-sm sm:text-base">{project.description || 'No description provided.'}</p>
                     </div>
-                    <div className="flex gap-2">
-                        <Badge variant="outline">{project.job_type}</Badge>
-                        <Badge className={getStatusColor(project.status)} variant="outline">
+                    <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline" className="h-6 sm:h-auto">{project.job_type}</Badge>
+                        <Badge className={`${getStatusColor(project.status)} h-6 sm:h-auto`} variant="outline">
                             {project.status}
                         </Badge>
                     </div>
                 </div>
 
                 {/* TOP SECTION: Tasks and Sidebar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
                     {/* Main Column: Tasks */}
-                    <div className="md:col-span-2 space-y-6">
-                        <Card className="h-full">
-                            <CardHeader>
-                                <CardTitle>Tasks</CardTitle>
+                    <div className="md:col-span-2 space-y-4 sm:space-y-6">
+                        <Card className="h-full shadow-sm py-4">
+                            {/* Standardized Dashboard Card Header */}
+                            <CardHeader className="px-4">
+                                <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Tasks</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="px-4">
                                 <TaskList projectId={projectId} isAdmin={isAdmin} />
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Sidebar: Project Info */}
-                    <div className="space-y-6">
-                        <Card className="h-full">
-                            <CardHeader>
-                                <CardTitle>Project Info</CardTitle>
+                    <div className="space-y-4 sm:space-y-6">
+                        <Card className="h-full shadow-sm py-4 gap-4">
+                            {/* Standardized Dashboard Card Header */}
+                            <CardHeader className="px-4">
+                                <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Project Info</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
+                            <CardContent className="space-y-4 text-sm px-4">
                                 <div>
                                     <span className="text-slate-500 font-medium block mb-1">Designer / Client</span>
                                     <div className="flex items-center gap-1.5">
@@ -166,10 +174,10 @@ export default function ProjectDetailsPage() {
                                     <span className="text-slate-900 font-medium">{formatDate(project.created_at)}</span>
                                 </div>
 
-                                {/* NEW: SECURE ADMIN FIELDS */}
+                                {/* SECURE ADMIN FIELDS */}
                                 {isAdmin && (
                                     <>
-                                        <div className="pt-2 mt-2 border-t border-slate-100">
+                                        <div className="pt-4 mt-2 border-t border-slate-100">
                                             <span className="text-slate-500 font-medium flex items-center gap-1.5">
                                                 Deposit Received <span title="Admin Only"><LockIcon className="w-3 h-3 text-slate-300" /></span>
                                             </span>
@@ -191,7 +199,7 @@ export default function ProjectDetailsPage() {
                                 )}
 
                                 {/* Gauteng Delivery Indicator */}
-                                <div>
+                                <div className="pt-2">
                                     <span className="text-slate-500 font-medium block">Delivery Location</span>
                                     <div className="mt-1">
                                         {project.delivery_gauteng ? (
@@ -210,12 +218,12 @@ export default function ProjectDetailsPage() {
                 </div>
 
                 {/* BOTTOM SECTION: Digital Asset Management (Full Width) */}
-                <div className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Digital Assets & Files</CardTitle>
+                <div className="mt-4 sm:mt-6">
+                    <Card className="shadow-sm py-4">
+                        <CardHeader className="px-4">
+                            <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Digital Assets & Files</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="px-4">
                             <ProjectFiles projectId={projectId} isAdmin={isAdmin} />
                         </CardContent>
                     </Card>

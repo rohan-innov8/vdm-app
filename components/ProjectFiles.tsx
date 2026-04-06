@@ -55,7 +55,8 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
         setUploading(true);
         const { data: { user } } = await supabase.auth.getUser();
 
-        // 2. Upload Process with Faux Progress
+        let successCount = 0;
+
         for (let i = 0; i < validFiles.length; i++) {
             const file = validFiles[i];
             setUploadProgress(`Uploading file ${i + 1} of ${validFiles.length}...`);
@@ -63,6 +64,7 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
             const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
             const filePath = `${projectId}/${Date.now()}_${safeName}`;
 
+            // Upload to storage
             const { error: uploadError } = await supabase.storage
                 .from('project-assets')
                 .upload(filePath, file);
@@ -72,32 +74,45 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                 continue;
             }
 
+            // Get the URL
             const { data: { publicUrl } } = supabase.storage
                 .from('project-assets')
                 .getPublicUrl(filePath);
 
-            await supabase.from('project_files').insert([{
+            // Insert matching your EXACT database schema
+            const { error: dbError } = await supabase.from('project_files').insert([{
                 project_id: projectId,
                 file_name: file.name,
                 file_size: file.size,
                 file_url: publicUrl,
                 uploaded_by: user?.id
             }]);
+
+            if (dbError) {
+                console.error('DB Insert Error:', dbError);
+                alert(`Uploaded ${file.name} but failed to link it. Contact support.`);
+            } else {
+                successCount++;
+            }
         }
 
         setUploading(false);
         setUploadProgress('');
         if (fileInputRef.current) fileInputRef.current.value = '';
-        fetchFiles();
+
+        if (successCount > 0) fetchFiles();
     };
 
     const handleDelete = async (fileId: string, fileUrl: string) => {
         if (!window.confirm('Are you sure you want to delete this file? This cannot be undone.')) return;
 
-        const urlParts = fileUrl.split('/project-assets/');
-        if (urlParts.length === 2) {
-            const path = urlParts[1];
-            await supabase.storage.from('project-assets').remove([path]);
+        // Safely extract the path from the URL to delete from storage
+        if (fileUrl) {
+            const urlParts = fileUrl.split('/project-assets/');
+            if (urlParts.length === 2) {
+                const path = urlParts[1];
+                await supabase.storage.from('project-assets').remove([path]);
+            }
         }
 
         await supabase.from('project_files').delete().eq('id', fileId);
@@ -112,10 +127,11 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
-    // Helper to determine file type for icons/previews
+    // Helper to determine file type based strictly on the file name extension
     const getFileType = (fileName: string) => {
+        if (!fileName) return 'other';
         const ext = fileName.split('.').pop()?.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return 'image';
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext || '')) return 'image';
         if (['pdf'].includes(ext || '')) return 'pdf';
         if (['csv', 'xls', 'xlsx'].includes(ext || '')) return 'spreadsheet';
         if (['txt', 'doc', 'docx'].includes(ext || '')) return 'text';
@@ -124,53 +140,54 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
     };
 
     return (
-        <div className="space-y-6 mt-2">
+        <div className="flex flex-col space-y-4">
 
-            {/* Upload Zone */}
-            <div
-                className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-indigo-50 hover:border-indigo-400 transition-colors cursor-pointer group bg-white"
-                onClick={() => fileInputRef.current?.click()}
-            >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <p className="text-sm text-slate-500">
+                    Upload drawings, reference images, and specs. (Max 50MB)
+                </p>
                 <input
                     type="file"
-                    multiple
-                    className="hidden"
                     ref={fileInputRef}
+                    className="hidden"
+                    multiple
                     onChange={handleFileUpload}
                 />
-                {uploading ? (
-                    <div className="flex flex-col items-center justify-center text-slate-500 gap-3">
-                        <Loader2Icon className="h-8 w-8 animate-spin text-indigo-600" />
-                        <p className="text-sm font-medium text-slate-700">{uploadProgress}</p>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full group-hover:scale-110 transition-transform">
-                            <UploadCloudIcon className="h-6 w-6" />
-                        </div>
-                        <p className="text-sm font-medium text-slate-700 mt-2">Click or drag files to upload</p>
-                        <p className="text-xs text-slate-400">Max size: 50MB per file. Supported: Images, PDF, CSV, TXT, Audio.</p>
-                    </div>
-                )}
+                <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="bg-slate-900 hover:bg-slate-800 text-white cursor-pointer w-full sm:w-auto h-12 sm:h-10 shadow-sm"
+                >
+                    {uploading ? (
+                        <>
+                            <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+                            {uploadProgress || 'Uploading...'}
+                        </>
+                    ) : (
+                        <>
+                            <UploadCloudIcon className="w-4 h-4 mr-2" />
+                            Upload Files
+                        </>
+                    )}
+                </Button>
             </div>
 
-            {/* File Grid */}
             <div>
                 {loading ? (
-                    <p className="text-sm text-slate-500 text-center py-8 animate-pulse">Loading assets...</p>
+                    <p className="text-sm text-slate-500">Loading files...</p>
                 ) : files.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-10 border border-dashed rounded-xl bg-white">No files or assets uploaded yet.</p>
+                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed rounded-lg">No files uploaded yet.</p>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {files.map(file => {
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {files.map((file) => {
                             const type = getFileType(file.file_name);
-                            return (
-                                <div key={file.id} className="group relative flex flex-col bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
 
-                                    {/* Preview Area */}
-                                    <div className="h-32 bg-slate-50 flex items-center justify-center border-b relative">
-                                        {type === 'image' ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
+                            return (
+                                <div key={file.id} className="border rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden group flex flex-col">
+
+                                    <div className="aspect-square bg-slate-50 relative flex items-center justify-center border-b p-4">
+                                        {type === 'image' && file.file_url ? (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
                                             <img src={file.file_url} alt={file.file_name} className="w-full h-full object-cover" />
                                         ) : type === 'pdf' ? (
                                             <FileTextIcon className="h-10 w-10 text-red-400" />
@@ -184,22 +201,28 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                                             <FileIcon className="h-10 w-10 text-slate-400" />
                                         )}
 
-                                        {/* Hover Overlay Actions */}
-                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        {/* Action Buttons Overlay: Always visible on mobile, hover on desktop */}
+                                        <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                                             <a href={file.file_url} target="_blank" rel="noopener noreferrer">
-                                                <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full cursor-pointer" title="Download">
-                                                    <DownloadIcon className="h-4 w-4" />
+                                                <Button
+                                                    size="icon"
+                                                    variant="secondary"
+                                                    className="h-10 w-10 sm:h-8 sm:w-8 rounded-full cursor-pointer shadow-md bg-white hover:bg-slate-100"
+                                                    title="Download"
+                                                >
+                                                    <DownloadIcon className="h-4 w-4 text-slate-700" />
                                                 </Button>
                                             </a>
+
                                             {isAdmin && (
                                                 <Button
-                                                    variant="destructive"
                                                     size="icon"
+                                                    variant="destructive"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         handleDelete(file.id, file.file_url);
                                                     }}
-                                                    className="h-8 w-8 rounded-full cursor-pointer"
+                                                    className="h-10 w-10 sm:h-8 sm:w-8 rounded-full cursor-pointer shadow-md"
                                                     title="Delete"
                                                 >
                                                     <Trash2Icon className="h-4 w-4" />
@@ -208,7 +231,6 @@ export function ProjectFiles({ projectId, isAdmin }: { projectId: string; isAdmi
                                         </div>
                                     </div>
 
-                                    {/* Details Area */}
                                     <div className="p-3">
                                         <p className="text-xs font-semibold text-slate-800 truncate" title={file.file_name}>
                                             {file.file_name}

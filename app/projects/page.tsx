@@ -74,7 +74,6 @@ export default function ProjectsPage() {
             setIsAdmin(profile?.role === 'admin');
         }
 
-        // NEW: Fetch projects AND the associated designer's name from the profiles table
         const { data, error } = await supabase
             .from('projects')
             .select('*');
@@ -152,29 +151,35 @@ export default function ProjectsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+            <div className="max-w-7xl mx-auto space-y-4">
 
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Projects</h1>
-                        <p className="text-slate-500">Manage manufacturing jobs and installations.</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Projects</h1>
+                        <p className="text-slate-500 text-sm sm:text-base mt-1">Manage manufacturing jobs and installations.</p>
                     </div>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <Link href="/">
-                            <Button variant="outline" className='cursor-pointer'>Back to Dashboard</Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Link href="/" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full sm:w-auto h-12 sm:h-10 cursor-pointer">
+                                Back to Dashboard
+                            </Button>
                         </Link>
-                        {isAdmin && <NewProjectDialog onProjectCreated={fetchProjects} />}
+                        {isAdmin && (
+                            <div className="w-full sm:w-auto [&>button]:w-full [&>button]:h-12 [&>button]:sm:h-10">
+                                <NewProjectDialog onProjectCreated={fetchProjects} />
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="relative">
-                    <svg className="absolute left-3 top-3 h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="absolute left-3 top-3.5 sm:top-3 h-5 w-5 sm:h-4 sm:w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <Input
                         placeholder="Search projects or designers..."
-                        className="pl-10 bg-white"
+                        className="pl-10 bg-white h-12 sm:h-10"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -184,9 +189,9 @@ export default function ProjectsPage() {
                     <div className="py-10 text-center text-slate-500 animate-pulse">Loading view...</div>
                 ) : (
                     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="kanban" className="cursor-pointer">Board View</TabsTrigger>
-                            <TabsTrigger value="list" className="cursor-pointer">List View</TabsTrigger>
+                        <TabsList className="mb-4 h-12 sm:h-10 w-full sm:w-auto">
+                            <TabsTrigger value="kanban" className="cursor-pointer h-full w-full sm:w-auto">Board View</TabsTrigger>
+                            <TabsTrigger value="list" className="cursor-pointer h-full w-full sm:w-auto">List View</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="kanban">
@@ -196,16 +201,19 @@ export default function ProjectsPage() {
                                     onProjectMoved={handleMoveProject}
                                     isAdmin={isAdmin}
                                     onDeleteProject={handleDeleteProject}
-                                    onProjectUpdated={fetchProjects} // <-- NEW 
+                                    onProjectUpdated={fetchProjects}
                                 />
                             )}
                         </TabsContent>
 
                         <TabsContent value="list">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>All Active Jobs ({filteredProjects.length})</CardTitle>
+                            <Card className="shadow-sm">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                                        All Active Jobs ({filteredProjects.length})
+                                    </CardTitle>
                                 </CardHeader>
+
                                 <CardContent>
                                     {loading ? (
                                         <p className="text-sm text-slate-500">Loading projects...</p>
@@ -214,117 +222,117 @@ export default function ProjectsPage() {
                                             No projects found matching your search.
                                         </div>
                                     ) : (
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('name')}>
-                                                        Project Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                    </TableHead>
-                                                    {/* NEW: Designer Column */}
-                                                    <TableHead>Designer</TableHead>
-                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('job_type')}>
-                                                        Type {sortConfig?.key === 'job_type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                    </TableHead>
-                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('status')}>
-                                                        Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                    </TableHead>
-                                                    {/* NEW: Loaded Date Column */}
-                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('created_at')}>
-                                                        Loaded {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                    </TableHead>
-                                                    <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('deadline')}>
-                                                        Deadline {sortConfig?.key === 'deadline' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                                                    </TableHead>
-                                                    <TableHead className="text-right">Action</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {filteredProjects.map((project) => (
-                                                    <TableRow
-                                                        key={project.id}
-                                                        className="cursor-pointer hover:bg-slate-50 transition-colors group"
-                                                        onClick={() => router.push(`/projects/${project.id}`)}
-                                                    >
-                                                        <TableCell className="font-medium">
-                                                            <span className="group-hover:text-orange-600 group-hover:underline transition-colors">
-                                                                {project.name}
-                                                            </span>
-                                                        </TableCell>
-                                                        {/* Standardized Designer Cell */}
-                                                        <TableCell>
-                                                            <div className="flex items-center gap-1.5">
-                                                                <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-[10px]">
-                                                                    {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
-                                                                </span>
-                                                                <span className="font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
-                                                            </div>
-                                                        </TableCell>
-
-                                                        <TableCell>
-                                                            <div className="flex flex-col items-start gap-1.5">
-                                                                <span>{project.job_type}</span>
-                                                                {project.delivery_gauteng ? (
-                                                                    <Badge variant="outline" className="text-[9px] uppercase bg-purple-50 text-purple-700 border-purple-200 px-1.5 py-0 h-4 shadow-none">
-                                                                        Gauteng
-                                                                    </Badge>
-                                                                ) : (
-                                                                    <Badge variant="outline" className="text-[9px] uppercase bg-gray-50 text-gray-700 border-gray-200 px-1.5 py-0 h-4 shadow-none">
-                                                                        Outside Gauteng
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Badge className={getStatusColor(project.status)} variant="outline">
-                                                                {project.status}
-                                                            </Badge>
-                                                        </TableCell>
-
-                                                        {/* NEW: Loaded Date Cell */}
-                                                        <TableCell className="text-slate-500">{formatDate(project.created_at)}</TableCell>
-
-                                                        <TableCell className="font-medium">{formatDate(project.deadline)}</TableCell>
-                                                        <TableCell className="text-right">
-                                                            <div className="flex justify-end items-center gap-2">
-                                                                <Button variant="ghost" size="sm" className="text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                                                    View →
-                                                                </Button>
-                                                                {isAdmin && (
-                                                                    <>
-                                                                        <EditProjectDialog
-                                                                            project={project}
-                                                                            onProjectUpdated={fetchProjects}
-                                                                            customTrigger={
-                                                                                <Button
-                                                                                    variant="ghost"
-                                                                                    size="icon"
-                                                                                    className="text-slate-400 hover:text-orange-600 hover:bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                    }}
-                                                                                    title="Edit Project"
-                                                                                >
-                                                                                    <PencilIcon className="h-4 w-4" />
-                                                                                </Button>
-                                                                            }
-                                                                        />
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                                                            onClick={(e) => handleDeleteProject(project.id, e)}
-                                                                            title="Delete Project"
-                                                                        >
-                                                                            <Trash2Icon className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </TableCell>
+                                        < div className="overflow-x-auto custom-scrollbar">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="whitespace-nowrap">
+                                                        <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('name')}>
+                                                            Project Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                        </TableHead>
+                                                        <TableHead>Designer</TableHead>
+                                                        <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('job_type')}>
+                                                            Type {sortConfig?.key === 'job_type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                        </TableHead>
+                                                        <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('status')}>
+                                                            Status {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                        </TableHead>
+                                                        <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('created_at')}>
+                                                            Loaded {sortConfig?.key === 'created_at' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                        </TableHead>
+                                                        <TableHead className="cursor-pointer hover:bg-slate-50" onClick={() => handleSort('deadline')}>
+                                                            Deadline {sortConfig?.key === 'deadline' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                                        </TableHead>
+                                                        <TableHead className="text-right">Action</TableHead>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {filteredProjects.map((project) => (
+                                                        <TableRow
+                                                            key={project.id}
+                                                            className="cursor-pointer hover:bg-slate-50 transition-colors group whitespace-nowrap"
+                                                            onClick={() => router.push(`/projects/${project.id}`)}
+                                                        >
+                                                            <TableCell className="font-medium">
+                                                                <span className="group-hover:text-orange-600 group-hover:underline transition-colors">
+                                                                    {project.name}
+                                                                </span>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-[10px]">
+                                                                        {project.client_name ? project.client_name.charAt(0).toUpperCase() : 'U'}
+                                                                    </span>
+                                                                    <span className="font-medium text-slate-700">{project.client_name || 'Unassigned'}</span>
+                                                                </div>
+                                                            </TableCell>
+
+                                                            <TableCell>
+                                                                <div className="flex flex-col items-start gap-1.5">
+                                                                    <span>{project.job_type}</span>
+                                                                    {project.delivery_gauteng ? (
+                                                                        <Badge variant="outline" className="text-[9px] uppercase bg-purple-50 text-purple-700 border-purple-200 px-1.5 py-0 h-4 shadow-none">
+                                                                            Gauteng
+                                                                        </Badge>
+                                                                    ) : (
+                                                                        <Badge variant="outline" className="text-[9px] uppercase bg-gray-50 text-gray-700 border-gray-200 px-1.5 py-0 h-4 shadow-none">
+                                                                            Outside Gauteng
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge className={getStatusColor(project.status)} variant="outline">
+                                                                    {project.status}
+                                                                </Badge>
+                                                            </TableCell>
+
+                                                            <TableCell className="text-slate-500">{formatDate(project.created_at)}</TableCell>
+
+                                                            <TableCell className="font-medium">{formatDate(project.deadline)}</TableCell>
+                                                            <TableCell className="text-right">
+                                                                <div className="flex justify-end items-center gap-2">
+                                                                    {/* CHANGED: opacity-100 lg:opacity-0 so it is always visible on mobile */}
+                                                                    <Button variant="ghost" size="sm" className="text-orange-600 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                                                        View →
+                                                                    </Button>
+                                                                    {isAdmin && (
+                                                                        <>
+                                                                            <EditProjectDialog
+                                                                                project={project}
+                                                                                onProjectUpdated={fetchProjects}
+                                                                                customTrigger={
+                                                                                    < Button
+                                                                                        variant="ghost"
+                                                                                        size="icon"
+                                                                                        className="h-12 w-12 sm:h-10 sm:w-10 text-slate-400 hover:text-orange-600 hover:bg-orange-50 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                        }}
+                                                                                        title="Edit Project"
+                                                                                    >
+                                                                                        <PencilIcon className="h-4 w-4" />
+                                                                                    </Button>
+                                                                                }
+                                                                            />
+                                                                            {/* CHANGED: opacity-100 lg:opacity-0 */}
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-12 w-12 sm:h-10 sm:w-10 text-red-500 hover:text-red-700 hover:bg-red-50 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                                onClick={(e) => handleDeleteProject(project.id, e)}
+                                                                                title="Delete Project"
+                                                                            >
+                                                                                <Trash2Icon className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     )}
                                 </CardContent>
                             </Card>
@@ -332,6 +340,6 @@ export default function ProjectsPage() {
                     </Tabs>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

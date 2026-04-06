@@ -35,45 +35,53 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        // p-4 (16px) on mobile, sm:p-8 (32px) on larger screens
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 sm:p-8">
+            {/* p-6 (24px) on mobile, sm:p-8 (32px) on desktop */}
+            <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                {/* mb-2 (8px) */}
                 <h1 className="text-2xl font-bold mb-2 text-center text-gray-900">Create Account</h1>
-                <p className="text-center text-gray-500 mb-8">Join the VDM App team</p>
+                {/* mb-8 (32px) */}
+                <p className="text-center text-gray-500 mb-8">Join the VDM App</p>
 
-                <form onSubmit={handleSignUp} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                {/* gap-6 (24px) between form blocks */}
+                <form onSubmit={handleSignUp} className="flex flex-col gap-6">
+
+                    {/* gap-2 (8px) between label and input */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-gray-700">Full Name</label>
                         <input
                             type="text"
                             required
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
-                            placeholder="John Doe"
+                            // h-12 (48px height) for perfect mobile touch target, px-4 (16px) padding
+                            className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-black transition-all"
+                            placeholder="e.g. Johannes Maker"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-gray-700">Email</label>
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
-                            placeholder="worker@minkelis.co.za"
+                            className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-black transition-all"
+                            placeholder="johannes@example.com"
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-gray-700">Password</label>
                         <input
                             type="password"
                             required
                             minLength={6}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-black"
+                            className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-black transition-all"
                             placeholder="••••••••"
                         />
                     </div>
@@ -81,18 +89,21 @@ export default function RegisterPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-600 text-white py-2.5 rounded-md hover:bg-indigo-700 transition font-medium disabled:opacity-50 mt-6"
+                        // h-12 (48px) to match inputs
+                        className="w-full h-12 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium disabled:opacity-50"
                     >
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
                 </form>
 
                 {message && (
+                    // mt-4 (16px)
                     <p className={`mt-4 text-center text-sm ${message.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
                         {message}
                     </p>
                 )}
 
+                {/* mt-6 (24px) */}
                 <div className="mt-6 text-center text-sm text-gray-600">
                     Already have an account?{' '}
                     <Link href="/login" className="text-indigo-600 hover:underline font-medium">

@@ -137,37 +137,37 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer">+ New Task</Button>
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm cursor-pointer h-12 sm:h-10">+ New Task</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[450px]">
+                    <DialogContent className="sm:max-w-[450px] p-4">
                         <DialogHeader>
                             <DialogTitle>Add New Task</DialogTitle>
                             <DialogDescription>Create a specific deliverable for this project.</DialogDescription>
                         </DialogHeader>
-                        <form onSubmit={handleAddTask} className="grid gap-4 py-4">
+                        <form onSubmit={handleAddTask} className="grid gap-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
 
                             <div className="space-y-1.5">
                                 <Label htmlFor="title">Task Name</Label>
-                                <Input id="title" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="e.g. Prep materials" required />
+                                <Input id="title" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="e.g. Prep materials" required className="h-12 sm:h-10" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label>Accountable</Label>
                                     <Select value={newTaskAccountable} onValueChange={setNewTaskAccountable}>
-                                        <SelectTrigger className="w-full"> {/* ADDED w-full */}
+                                        <SelectTrigger className="w-full h-12 sm:h-10">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {TEAM_MEMBERS.map(member => (
-                                                <SelectItem key={member} value={member}>{member}</SelectItem>
+                                                <SelectItem key={member} value={member} className="py-3 sm:py-1.5">{member}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label htmlFor="deadline">Deadline</Label>
-                                    <Input id="deadline" type="date" value={newTaskDeadline} onChange={(e) => setNewTaskDeadline(e.target.value)} />
+                                    <Input id="deadline" type="date" value={newTaskDeadline} onChange={(e) => setNewTaskDeadline(e.target.value)} className="h-12 sm:h-10" />
                                 </div>
                             </div>
 
@@ -176,9 +176,11 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 <Textarea id="desc" value={newTaskDesc} onChange={(e) => setNewTaskDesc(e.target.value)} placeholder="Provide detailed instructions..." rows={3} />
                             </div>
 
-                            <Button type="submit" disabled={!newTaskTitle.trim()} className="w-full mt-2 bg-indigo-600 text-white">
-                                Save Task
-                            </Button>
+                            <div className="flex justify-end pt-2">
+                                <Button type="submit" disabled={!newTaskTitle.trim()} className="w-full h-12 sm:h-10 bg-indigo-600 text-white cursor-pointer">
+                                    Save Task
+                                </Button>
+                            </div>
                         </form>
                     </DialogContent>
                 </Dialog>
@@ -219,7 +221,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                         <span className="text-xs font-medium text-slate-700">{task.accountable_name || 'Unassigned'}</span>
                                     </div>
 
-                                    {/* NEW: Audit Trail Badge */}
+                                    {/* Audit Trail Badge */}
                                     {isDone && task.completed_at && (
                                         <div className="mt-3 text-[10px] text-green-700 bg-green-50 px-2 py-1 rounded-md border border-green-200 w-fit font-medium">
                                             ✓ Completed by {task.completed_by_name} on {new Date(task.completed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
@@ -230,16 +232,16 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                 {/* Actions */}
                                 <div className="flex items-center justify-between gap-2 pt-2 border-t">
                                     <Select value={task.status} onValueChange={(val) => handleStatusChange(task.id, val)}>
-                                        <SelectTrigger className={`w-[130px] h-8 text-xs font-medium cursor-pointer ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
+                                        <SelectTrigger className={`w-[130px] h-12 sm:h-10 text-xs font-medium cursor-pointer ${task.status === 'Done' ? 'bg-green-50 text-green-700 border-green-200' :
                                             task.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                                                 'bg-gray-100 text-gray-700'
                                             }`}>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Pending">Pending</SelectItem>
-                                            <SelectItem value="In Progress">In Progress</SelectItem>
-                                            <SelectItem value="Done">Done</SelectItem>
+                                            <SelectItem value="Pending" className="py-3 sm:py-1.5">Pending</SelectItem>
+                                            <SelectItem value="In Progress" className="py-3 sm:py-1.5">In Progress</SelectItem>
+                                            <SelectItem value="Done" className="py-3 sm:py-1.5">Done</SelectItem>
                                         </SelectContent>
                                     </Select>
 
@@ -250,7 +252,7 @@ export function TaskList({ projectId, isAdmin }: { projectId: string; isAdmin: b
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDeleteTask(task.id)}
-                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 cursor-pointer"
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-12 w-12 sm:h-8 sm:w-8 cursor-pointer"
                                                 title="Delete Task"
                                             >
                                                 <Trash2Icon className="h-4 w-4" />

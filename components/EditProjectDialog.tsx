@@ -98,7 +98,7 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                 )}
             </DialogTrigger>
             <DialogContent
-                className="sm:max-w-[500px]"
+                className="sm:max-w-[500px] p-4"
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
@@ -107,35 +107,35 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     <DialogTitle>Edit Job Card</DialogTitle>
                     <DialogDescription>Update the details for this project.</DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[75vh] overflow-y-auto px-2 custom-scrollbar">
+                <form onSubmit={handleSubmit} className="grid gap-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <div className="space-y-1.5">
                         <Label htmlFor="name">Project Name</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smith Kitchen Island" required />
+                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Smith Kitchen Island" required className="h-12 sm:h-10" />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label>Designer</Label>
                             <Select value={clientSelection} onValueChange={setClientSelection}>
-                                <SelectTrigger className="w-full">
+                                <SelectTrigger className="w-full h-12 sm:h-10">
                                     <SelectValue placeholder="Select designer..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {TOP_CLIENTS.map(client => (
-                                        <SelectItem key={client} value={client}>{client}</SelectItem>
+                                        <SelectItem key={client} value={client} className="py-3 sm:py-1.5">{client}</SelectItem>
                                     ))}
-                                    <SelectItem value="Other">Other (Custom)</SelectItem>
+                                    <SelectItem value="Other" className="py-3 sm:py-1.5">Other (Custom)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
                             <Label>Job Type</Label>
                             <Select value={jobType} onValueChange={setJobType}>
-                                <SelectTrigger className="w-full"><SelectValue placeholder="Select type" /></SelectTrigger>
+                                <SelectTrigger className="w-full h-12 sm:h-10"><SelectValue placeholder="Select type" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Loose Item">Loose Item</SelectItem>
-                                    <SelectItem value="Big Install">Big Install</SelectItem>
-                                    <SelectItem value="Small Install">Small Install</SelectItem>
+                                    <SelectItem value="Loose Item" className="py-3 sm:py-1.5">Loose Item</SelectItem>
+                                    <SelectItem value="Big Install" className="py-3 sm:py-1.5">Big Install</SelectItem>
+                                    <SelectItem value="Small Install" className="py-3 sm:py-1.5">Small Install</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -144,19 +144,19 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                     {clientSelection === 'Other' && (
                         <div className="space-y-1.5">
                             <Label htmlFor="customClient" className="text-slate-400 text-xs">Custom Designer Name</Label>
-                            <Input id="customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} placeholder="Enter designer name..." required />
+                            <Input id="customClient" value={customClient} onChange={(e) => setCustomClient(e.target.value)} placeholder="Enter designer name..." required className="h-12 sm:h-10" />
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <Label htmlFor="deadline">Prod. Deadline</Label>
-                            <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                            <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="h-12 sm:h-10" />
                         </div>
-                        <div className="space-y-1.5 flex flex-col justify-end pb-2">
+                        <div className="space-y-1.5 flex flex-col justify-center sm:justify-end pb-0 sm:pb-2 min-h-[48px] sm:min-h-0">
                             <div className="flex items-center space-x-2">
-                                <input type="checkbox" id="gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
-                                <Label htmlFor="gauteng" className="cursor-pointer">Delivery in Gauteng</Label>
+                                <input type="checkbox" id="gauteng" checked={deliveryGauteng} onChange={(e) => setDeliveryGauteng(e.target.checked)} className="w-5 h-5 sm:w-4 sm:h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500 cursor-pointer" />
+                                <Label htmlFor="gauteng" className="cursor-pointer text-base sm:text-sm">Delivery in Gauteng</Label>
                             </div>
                         </div>
                     </div>
@@ -172,22 +172,22 @@ export function EditProjectDialog({ project, onProjectUpdated, customTrigger }: 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Install Date</Label>
-                                <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} />
+                                <Input type="date" value={installationDate} onChange={(e) => setInstallationDate(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Deposit Rec'd</Label>
-                                <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} />
+                                <Input type="date" value={depositReceived} onChange={(e) => setDepositReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                             <div className="space-y-1.5">
                                 <Label className="text-xs">Drawings Rec'd</Label>
-                                <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} />
+                                <Input type="date" value={drawingsReceived} onChange={(e) => setDrawingsReceived(e.target.value)} className="h-12 sm:h-10" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end mt-2 pt-4 border-t sticky bottom-0 bg-white">
-                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white w-full">
-                            {loading ? 'Saving...' : 'Save Job Card'}
+                    <div className="flex justify-end pt-2">
+                        <Button type="submit" disabled={loading || !isFormValid} className="bg-orange-600 text-white w-full h-12 sm:h-10 cursor-pointer">
+                            {loading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </form>
