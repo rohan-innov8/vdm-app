@@ -85,7 +85,7 @@ export default function UserManagementPage() {
                 alert("User deleted successfully.");
                 setUsers(users.filter(u => u.id !== userId));
             } else {
-                alert("Failed to delete user: " + result.error);
+                alert("Failed to delete user: " + ((result as any).error || "Unknown error"));
             }
         } catch (err: any) {
             alert("Error: " + err.message);
